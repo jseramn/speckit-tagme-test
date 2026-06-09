@@ -1,0 +1,7 @@
+---
+pid: 3668
+cwd: "C:\Users\jseramn\Desktop\speckit-tagme-test"
+command: "curl -s -o NUL -w \"%{http_code}\" http://localhost:3000/t/caribe-room-412"
+started_at: 2026-06-09T03:18:23.699Z
+running_for_ms: 675007   
+---

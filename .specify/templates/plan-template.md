@@ -40,7 +40,16 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+| Principle | Gate | Status |
+|-----------|------|--------|
+| I. Spec-Driven Development | `spec.md` exists with user stories, requirements, and success criteria | ⬜ |
+| II. Library-First | Plan identifies self-contained modules with clear purpose; no org-only wrappers | ⬜ |
+| III. Test-First (NON-NEGOTIABLE) | Test strategy defined; test tasks precede implementation in tasks.md | ⬜ |
+| IV. Integration Testing | Contract/integration test scope identified for API, schema, or boundary changes | ⬜ |
+| V. Simplicity & Observability | Complexity justified in table below if needed; logging/observability approach stated | ⬜ |
+
+All gates MUST pass before Phase 0 research. Re-evaluate after Phase 1 design. Any
+failure requires documented justification in Complexity Tracking or a spec amendment.
 
 ## Project Structure
 
