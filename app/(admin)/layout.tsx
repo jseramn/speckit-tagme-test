@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { getSession } from "@/lib/auth/session";
+import { getSession, isExecutiveSession } from "@/lib/auth/session";
 
 export default async function AdminLayout({
   children,
@@ -11,6 +11,10 @@ export default async function AdminLayout({
 
   if (!session) {
     redirect("/login");
+  }
+
+  if (isExecutiveSession(session)) {
+    redirect("/executive/overview");
   }
 
   return (
