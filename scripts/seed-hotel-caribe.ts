@@ -1,7 +1,8 @@
 #!/usr/bin/env tsx
 /**
- * TagMe MVP — Seed piloto Hotel Caribe (T014)
+ * TagMe MVP — Seed piloto Hotel Caribe (T014 + T007–T010 executive)
  * Spec: specs/001-tagme-platform/data-model.md
+ *       specs/002-clevel/spec.md (CL-02/03/04/08, CL-10/11)
  *
  * Idempotent: safe to re-run; updates venue/tags/KB and skips metrics if already seeded.
  *
@@ -10,6 +11,20 @@
  *   npx tsx scripts/seed-hotel-caribe.ts
  *
  * Requires: INSFORGE_URL, INSFORGE_SERVICE_KEY in .env.local or environment
+ *
+ * Demo executive credentials (local/dev only — do NOT use in production):
+ *   Password: set EXECUTIVE_DEMO_PASSWORD in .env.local, or default "TagMe-Caribe-Demo-2026!"
+ *
+ *   | Email                          | Rol             | Scope        | Login hint        |
+ *   |--------------------------------|-----------------|--------------|-------------------|
+ *   | gg@hotel-caribe.demo           | executive       | —            | Gerente General   |
+ *   | ops-manager@hotel-caribe.demo  | manager         | operations   | Gerente Operac.   |
+ *   | fnb-manager@hotel-caribe.demo  | manager         | fnb          | Gerente F&B       |
+ *   | experience-manager@...         | manager         | experience   | Gerente Experiencia |
+ *   | front-office@hotel-caribe.demo | department_head | front_office | Jefe Recepción  |
+ *
+ * Production pilot users (T088): create in InsForge Auth console — NOT in this seed.
+ * See specs/002-clevel/quickstart.md § "Usuarios reales del piloto".
  */
 
 import { readFileSync, existsSync } from "node:fs";
@@ -471,6 +486,453 @@ function touchTimestamp(daysAgo: number, hour: number): string {
 }
 
 // ---------------------------------------------------------------------------
+// Executive layer — CL-02/03/04/08 (T007–T010)
+// ---------------------------------------------------------------------------
+
+const BOGOTA_OPERATING_HOURS = {
+  start: "06:00",
+  end: "23:00",
+  timezone: "America/Bogota",
+};
+
+const ALERT_THRESHOLDS: Array<{
+  alert_type: "activity_drop" | "tag_inactive" | "avex_derivation";
+  department: string | null;
+  config: Record<string, unknown>;
+}> = [
+  {
+    alert_type: "activity_drop",
+    department: null,
+    config: {
+      attention_drop_pct: 40,
+      critical_drop_pct: 60,
+      min_delta_touches_attention: 3,
+      min_delta_touches_critical: 5,
+      evaluation_window_min: 60,
+      dedup_window_hours: 4,
+      operating_hours: BOGOTA_OPERATING_HOURS,
+    },
+  },
+  {
+    alert_type: "tag_inactive",
+    department: null,
+    config: {
+      inactive_hours: 24,
+      min_venue_touches_per_day: 5,
+      grace_hours: 72,
+      operating_hours: BOGOTA_OPERATING_HOURS,
+    },
+  },
+  {
+    alert_type: "avex_derivation",
+    department: "front_office",
+    config: {
+      attention_pct: 25,
+      critical_pct: 40,
+      window_hours: 1,
+      min_sessions_attention: 4,
+      min_sessions_critical: 6,
+      dedup_window_hours: 4,
+    },
+  },
+];
+
+const KPI_TARGETS: Array<{
+  department: string;
+  kpi_key: string;
+  weekly: number;
+  monthly: number;
+  comparison: "gte" | "lte";
+}> = [
+  {
+    department: "executive",
+    kpi_key: "total_interactions",
+    weekly: 150,
+    monthly: 700,
+    comparison: "gte",
+  },
+  {
+    department: "executive",
+    kpi_key: "avex_resolution_rate",
+    weekly: 75,
+    monthly: 80,
+    comparison: "gte",
+  },
+  {
+    department: "front_office",
+    kpi_key: "avex_derivation_rate",
+    weekly: 25,
+    monthly: 20,
+    comparison: "lte",
+  },
+  {
+    department: "front_office",
+    kpi_key: "avex_sessions_per_day",
+    weekly: 8,
+    monthly: 10,
+    comparison: "gte",
+  },
+  {
+    department: "operations",
+    kpi_key: "nfc_direct_rate",
+    weekly: 70,
+    monthly: 75,
+    comparison: "gte",
+  },
+  {
+    department: "operations",
+    kpi_key: "abandonment_rate",
+    weekly: 15,
+    monthly: 12,
+    comparison: "lte",
+  },
+  {
+    department: "fnb",
+    kpi_key: "menu_visit_pct",
+    weekly: 50,
+    monthly: 55,
+    comparison: "gte",
+  },
+  {
+    department: "experience",
+    kpi_key: "destinations_per_touch",
+    weekly: 1.2,
+    monthly: 1.3,
+    comparison: "gte",
+  },
+  {
+    department: "transversal",
+    kpi_key: "alert_action_rate",
+    weekly: 80,
+    monthly: 85,
+    comparison: "gte",
+  },
+];
+
+interface DemoExecutiveUser {
+  email: string;
+  displayName: string;
+  role: "executive" | "manager" | "department_head";
+  executiveScope:
+    | "operations"
+    | "front_office"
+    | "fnb"
+    | "experience"
+    | null;
+  loginHint: string;
+}
+
+const DEMO_EXECUTIVE_USERS: DemoExecutiveUser[] = [
+  {
+    email: "gg@hotel-caribe.demo",
+    displayName: "Gerente General (demo)",
+    role: "executive",
+    executiveScope: null,
+    loginHint: "Vista consolidada /executive/overview",
+  },
+  {
+    email: "ops-manager@hotel-caribe.demo",
+    displayName: "Gerente Operaciones (demo)",
+    role: "manager",
+    executiveScope: "operations",
+    loginHint: "Dashboard operaciones /executive/operations",
+  },
+  {
+    email: "fnb-manager@hotel-caribe.demo",
+    displayName: "Gerente F&B (demo)",
+    role: "manager",
+    executiveScope: "fnb",
+    loginHint: "Dashboard F&B /executive/fnb",
+  },
+  {
+    email: "experience-manager@hotel-caribe.demo",
+    displayName: "Gerente Experiencia (demo)",
+    role: "manager",
+    executiveScope: "experience",
+    loginHint: "Dashboard experiencia /executive/experience",
+  },
+  {
+    email: "front-office@hotel-caribe.demo",
+    displayName: "Jefe Recepción (demo)",
+    role: "department_head",
+    executiveScope: "front_office",
+    loginHint: "Dashboard front office /executive/front-office",
+  },
+];
+
+function demoExecutivePassword(): string {
+  return (
+    process.env.EXECUTIVE_DEMO_PASSWORD?.trim() || "TagMe-Caribe-Demo-2026!"
+  );
+}
+
+type InsforgeClient = Awaited<
+  ReturnType<typeof import("@insforge/sdk")["createClient"]>
+>;
+
+async function upsertAlertThreshold(
+  insforge: InsforgeClient,
+  venueId: string,
+  row: (typeof ALERT_THRESHOLDS)[number],
+): Promise<void> {
+  let query = insforge.database
+    .from("alert_thresholds")
+    .select("id")
+    .eq("venue_id", venueId)
+    .eq("alert_type", row.alert_type);
+
+  if (row.department === null) {
+    query = query.is("department", null);
+  } else {
+    query = query.eq("department", row.department);
+  }
+
+  const { data: existing, error: lookupError } = await query.maybeSingle();
+
+  if (lookupError) {
+    throw new Error(
+      `Failed to lookup alert_threshold ${row.alert_type}: ${lookupError.message}`,
+    );
+  }
+
+  const payload = {
+    venue_id: venueId,
+    alert_type: row.alert_type,
+    department: row.department,
+    config: row.config,
+    is_active: true,
+  };
+
+  if (existing) {
+    const { error } = await insforge.database
+      .from("alert_thresholds")
+      .update(payload)
+      .eq("id", existing.id);
+
+    if (error) {
+      throw new Error(
+        `Failed to update alert_threshold ${row.alert_type}: ${error.message}`,
+      );
+    }
+    console.log(`✓ alert_threshold "${row.alert_type}" updated`);
+  } else {
+    const { error } = await insforge.database
+      .from("alert_thresholds")
+      .insert([payload]);
+
+    if (error) {
+      throw new Error(
+        `Failed to insert alert_threshold ${row.alert_type}: ${error.message}`,
+      );
+    }
+    console.log(`✓ alert_threshold "${row.alert_type}" created`);
+  }
+}
+
+async function upsertKpiTarget(
+  insforge: InsforgeClient,
+  venueId: string,
+  department: string,
+  kpiKey: string,
+  period: "weekly" | "monthly",
+  targetValue: number,
+  comparison: "gte" | "lte",
+): Promise<void> {
+  const { data: existing, error: lookupError } = await insforge.database
+    .from("kpi_targets")
+    .select("id")
+    .eq("venue_id", venueId)
+    .eq("department", department)
+    .eq("kpi_key", kpiKey)
+    .eq("period", period)
+    .maybeSingle();
+
+  if (lookupError) {
+    throw new Error(
+      `Failed to lookup kpi_target ${department}/${kpiKey}/${period}: ${lookupError.message}`,
+    );
+  }
+
+  const payload = {
+    venue_id: venueId,
+    department,
+    kpi_key: kpiKey,
+    period,
+    target_value: targetValue,
+    comparison,
+  };
+
+  if (existing) {
+    const { error } = await insforge.database
+      .from("kpi_targets")
+      .update(payload)
+      .eq("id", existing.id);
+
+    if (error) {
+      throw new Error(
+        `Failed to update kpi_target ${kpiKey}/${period}: ${error.message}`,
+      );
+    }
+  } else {
+    const { error } = await insforge.database
+      .from("kpi_targets")
+      .insert([payload]);
+
+    if (error) {
+      throw new Error(
+        `Failed to insert kpi_target ${kpiKey}/${period}: ${error.message}`,
+      );
+    }
+  }
+}
+
+async function upsertVenueBaseline(
+  insforge: InsforgeClient,
+  venueId: string,
+): Promise<void> {
+  const { data: existing, error: lookupError } = await insforge.database
+    .from("venue_baseline")
+    .select("venue_id, baseline_ready")
+    .eq("venue_id", venueId)
+    .maybeSingle();
+
+  if (lookupError) {
+    throw new Error(`Failed to lookup venue_baseline: ${lookupError.message}`);
+  }
+
+  const payload = {
+    venue_id: venueId,
+    first_touch_at: null,
+    total_touches: 0,
+    baseline_ready: false,
+  };
+
+  if (existing) {
+    const { error } = await insforge.database
+      .from("venue_baseline")
+      .update(payload)
+      .eq("venue_id", venueId);
+
+    if (error) {
+      throw new Error(`Failed to update venue_baseline: ${error.message}`);
+    }
+    console.log(`✓ venue_baseline updated (baseline_ready=false)`);
+  } else {
+    const { error } = await insforge.database
+      .from("venue_baseline")
+      .insert([payload]);
+
+    if (error) {
+      throw new Error(`Failed to insert venue_baseline: ${error.message}`);
+    }
+    console.log(`✓ venue_baseline created (baseline_ready=false)`);
+  }
+}
+
+async function ensureDemoExecutiveUser(
+  insforge: InsforgeClient,
+  venueId: string,
+  user: DemoExecutiveUser,
+  password: string,
+): Promise<void> {
+  let authUserId: string | null = null;
+
+  const { createAdminClient } = await import("@insforge/sdk");
+  const admin = createAdminClient({
+    baseUrl: requireEnv("INSFORGE_URL"),
+    apiKey: requireEnv("INSFORGE_SERVICE_KEY"),
+  });
+
+  const { data: signInData } = await admin.auth.signInWithPassword({
+    email: user.email,
+    password,
+  });
+
+  if (signInData?.user?.id) {
+    authUserId = signInData.user.id;
+  } else {
+    const { data: signUpData, error: signUpError } = await admin.auth.signUp({
+      email: user.email,
+      password,
+      name: user.displayName,
+    });
+
+    if (signUpData?.user?.id) {
+      authUserId = signUpData.user.id;
+    } else if (signUpError) {
+      const msg = signUpError.message?.toLowerCase() ?? "";
+      if (msg.includes("already") || msg.includes("exist")) {
+        const retry = await admin.auth.signInWithPassword({
+          email: user.email,
+          password,
+        });
+        authUserId = retry.data?.user?.id ?? null;
+      }
+      if (!authUserId) {
+        console.warn(
+          `⚠ Demo user ${user.email} no creado (${signUpError.message}). ` +
+            "Use STAFF_DEV_EXECUTIVE_ROLE en desarrollo o cree el usuario en InsForge Auth.",
+        );
+        return;
+      }
+    }
+  }
+
+  if (!authUserId) {
+    console.warn(
+      `⚠ Demo user ${user.email} sin auth_user_id — omitiendo user_profile`,
+    );
+    return;
+  }
+
+  const { data: existingProfile, error: profileLookupError } =
+    await insforge.database
+      .from("user_profiles")
+      .select("id")
+      .eq("auth_user_id", authUserId)
+      .maybeSingle();
+
+  if (profileLookupError) {
+    throw new Error(
+      `Failed to lookup user_profile for ${user.email}: ${profileLookupError.message}`,
+    );
+  }
+
+  const profilePayload = {
+    auth_user_id: authUserId,
+    venue_id: venueId,
+    role: user.role,
+    display_name: user.displayName,
+    executive_scope: user.executiveScope,
+  };
+
+  if (existingProfile) {
+    const { error } = await insforge.database
+      .from("user_profiles")
+      .update(profilePayload)
+      .eq("id", existingProfile.id);
+
+    if (error) {
+      throw new Error(
+        `Failed to update user_profile for ${user.email}: ${error.message}`,
+      );
+    }
+    console.log(`✓ user_profile "${user.email}" updated (${user.role})`);
+  } else {
+    const { error } = await insforge.database
+      .from("user_profiles")
+      .insert([profilePayload]);
+
+    if (error) {
+      throw new Error(
+        `Failed to insert user_profile for ${user.email}: ${error.message}`,
+      );
+    }
+    console.log(`✓ user_profile "${user.email}" created (${user.role})`);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Seed logic (idempotent)
 // ---------------------------------------------------------------------------
 
@@ -757,7 +1219,48 @@ async function main(): Promise<void> {
     console.log(`✓ ${touchCount} touch_events + ${visitCount} destination_visits created`);
   }
 
-  // 6. Verification summary
+  // 6. Executive alert thresholds (CL-02/03/04 + gracia 72h CL-10)
+  console.log("\n→ Seeding executive alert_thresholds…");
+  for (const threshold of ALERT_THRESHOLDS) {
+    await upsertAlertThreshold(insforge, venueId, threshold);
+  }
+
+  // 7. KPI targets (CL-08 — 9 KPIs × weekly/monthly)
+  console.log("\n→ Seeding executive kpi_targets…");
+  for (const kpi of KPI_TARGETS) {
+    await upsertKpiTarget(
+      insforge,
+      venueId,
+      kpi.department,
+      kpi.kpi_key,
+      "weekly",
+      kpi.weekly,
+      kpi.comparison,
+    );
+    await upsertKpiTarget(
+      insforge,
+      venueId,
+      kpi.department,
+      kpi.kpi_key,
+      "monthly",
+      kpi.monthly,
+      kpi.comparison,
+    );
+  }
+  console.log(`✓ ${KPI_TARGETS.length * 2} kpi_targets upserted`);
+
+  // 8. Venue baseline (CL-11 — calibración hasta 14 días + 100 toques)
+  console.log("\n→ Seeding venue_baseline…");
+  await upsertVenueBaseline(insforge, venueId);
+
+  // 9. Demo executive auth users + profiles (T009)
+  console.log("\n→ Seeding demo executive users…");
+  const demoPassword = demoExecutivePassword();
+  for (const user of DEMO_EXECUTIVE_USERS) {
+    await ensureDemoExecutiveUser(insforge, venueId, user, demoPassword);
+  }
+
+  // 10. Verification summary
   const { data: tags, error: tagsError } = await insforge.database
     .from("nfc_tags")
     .select("slug, zone, is_active")
@@ -805,6 +1308,18 @@ async function main(): Promise<void> {
       const room = t.zone === "room" ? ` · habitación` : "";
       console.log(`   • /t/${t.slug} (${t.zone}${room})`);
     }
+
+    console.log("\n   Login gerencial (executive layer — M0):");
+    console.log(
+      "   Password: EXECUTIVE_DEMO_PASSWORD en .env.local o valor por defecto del script",
+    );
+    for (const user of DEMO_EXECUTIVE_USERS) {
+      const scope = user.executiveScope ? ` · scope=${user.executiveScope}` : "";
+      console.log(
+        `   • ${user.email} → ${user.role}${scope} — ${user.loginHint}`,
+      );
+    }
+    console.log("   URL: /login → redirige a /executive/overview tras auth");
   }
 }
 
