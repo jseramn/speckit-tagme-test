@@ -14,6 +14,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "seed": "tsx scripts/seed-hotel-caribe.ts",
+    "seed:staff": "tsx scripts/seed-hotel-caribe-staff.ts",
+    "seed:pilot-users": "tsx scripts/seed-pilot-users.ts",
     "db:migrate": "tsx scripts/apply-migrations.ts"
   },
   "dependencies": {
