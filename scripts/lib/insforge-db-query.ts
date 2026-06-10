@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 
-export interface AuthUserRow {
+export interface AuthUserRow extends Record<string, unknown> {
   id: string;
   email: string;
   email_verified: boolean;
