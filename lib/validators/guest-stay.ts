@@ -39,6 +39,7 @@ export const stayLookupResponseSchema = z.object({
   stayId: z.string().uuid(),
   stayType: z.enum(["formal", "ephemeral"]),
   status: z.enum(["active", "expired", "consolidated", "closed"]),
+  startedAt: z.string().datetime(),
   expiresAt: z.string().datetime(),
   recordCounts: z.object({
     feedbacks: z.number().int().nonnegative(),
@@ -47,3 +48,24 @@ export const stayLookupResponseSchema = z.object({
 });
 
 export type StayLookupResponse = z.infer<typeof stayLookupResponseSchema>;
+
+export const closeStayResponseSchema = z.object({
+  stayId: z.string().uuid(),
+  status: z.literal("closed"),
+  closedAt: z.string().datetime(),
+});
+
+export type CloseStayResponse = z.infer<typeof closeStayResponseSchema>;
+
+export const consolidateStayResponseSchema = z.object({
+  formalStayId: z.string().uuid(),
+  consolidatedRecords: z.object({
+    feedbacks: z.number().int().nonnegative(),
+    incidents: z.number().int().nonnegative(),
+  }),
+  ephemeralStatus: z.literal("consolidated"),
+});
+
+export type ConsolidateStayResponse = z.infer<
+  typeof consolidateStayResponseSchema
+>;

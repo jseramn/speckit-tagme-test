@@ -1,5 +1,5 @@
 import { validateSession } from "@/lib/staff/validate-session";
-import { resolveOrCreateEphemeralStay } from "@/lib/stays/create-ephemeral-stay";
+import { resolveGuestStayForCapture } from "@/lib/stays/resolve-guest-stay-for-capture";
 import { CaptureError } from "@/lib/capture/errors";
 import { createInsforgeServerClient } from "@/lib/insforge-server";
 import type { SubmitFeedbackRequest } from "@/lib/validators/feedback";
@@ -49,7 +49,7 @@ export async function submitFeedback(
     );
   }
 
-  const { stay, created } = await resolveOrCreateEphemeralStay(
+  const { stay, created } = await resolveGuestStayForCapture(
     session.venueId,
     input.stayTokenFromCookie,
   );
