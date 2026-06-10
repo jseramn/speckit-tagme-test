@@ -177,39 +177,39 @@ description: "Lista de tareas TagMe Fase 3 — Staff & Feedback Operativo (miles
 
 ### Tests
 
-- [ ] T051 [Prioridad: Alta] [Milestone: M2] Contract tests estadía en `tests/contract/003-staff/guest-stay.test.ts` para POST formal, lookup, close según `contracts/guest-stay.md`. [S4] Depends on: T021
+- [x] T051 [Prioridad: Alta] [Milestone: M2] Contract tests estadía en `tests/contract/003-staff/guest-stay.test.ts` para POST formal, lookup, close según `contracts/guest-stay.md`. [S4] Depends on: T021
 
-- [ ] T052 [Prioridad: Alta] [Milestone: M2] Unit test `tests/unit/stay-ephemeral.test.ts`: reutilización cookie, expiración lazy, múltiples feedbacks mismo stay (S2/G3). Depends on: T036
+- [x] T052 [Prioridad: Alta] [Milestone: M2] Unit test `tests/unit/stay-ephemeral.test.ts`: reutilización cookie, expiración lazy, múltiples feedbacks mismo stay (S2/G3). Depends on: T036
 
 ### lib/stays — formal
 
-- [ ] T053 [Prioridad: Alta] [Milestone: M2] Implementar `createFormalStay()` en `lib/stays/create-formal-stay.ts`: TTL desde `venue_staff_settings.default_stay_ttl_days`, `stay_type=formal`, `created_by` recepción. [S4] Depends on: T035
+- [x] T053 [Prioridad: Alta] [Milestone: M2] Implementar `createFormalStay()` en `lib/stays/create-formal-stay.ts`: TTL desde `venue_staff_settings.default_stay_ttl_days`, `stay_type=formal`, `created_by` recepción. [S4] Depends on: T035
 
-- [ ] T054 [Prioridad: Alta] [Milestone: M2] Implementar `lib/stays/resolve-guest-stay-for-capture.ts` unificando lógica para APIs captura: priorizar cookie formal > efímera activa > crear efímero. [NUEVO] Depends on: T036, T053
+- [x] T054 [Prioridad: Alta] [Milestone: M2] Implementar `lib/stays/resolve-guest-stay-for-capture.ts` unificando lógica para APIs captura: priorizar cookie formal > efímera activa > crear efímero. [NUEVO] Depends on: T036, T053
 
 ### API recepción
 
-- [ ] T055 [Prioridad: Alta] [Milestone: M2] Crear `POST /api/reception/stays/route.ts`: auth `requireReception()` (= `canManageGuestStays`), `createFormalStay`, `setStayCookie`, 201. [REUTILIZA F1: patrón `app/api/admin/tags/route.ts`] Depends on: T053, T034, T022
+- [x] T055 [Prioridad: Alta] [Milestone: M2] Crear `POST /api/reception/stays/route.ts`: auth `requireReception()` (= `canManageGuestStays`), `createFormalStay`, `setStayCookie`, 201. [REUTILIZA F1: patrón `app/api/admin/tags/route.ts`] Depends on: T053, T034, T022
 
-- [ ] T056 [Prioridad: Alta] [Milestone: M2] Crear `GET /api/reception/stays/lookup/route.ts`: auth `requireReception()`; preview stay por token + `recordCounts` feedbacks/incidencias. Depends on: T035, T055
+- [x] T056 [Prioridad: Alta] [Milestone: M2] Crear `GET /api/reception/stays/lookup/route.ts`: auth `requireReception()`; preview stay por token + `recordCounts` feedbacks/incidencias. Depends on: T035, T055
 
-- [ ] T057 [Prioridad: Alta] [Milestone: M2] Crear `POST /api/reception/stays/[stayId]/close/route.ts`: auth `requireReception()`; `status=closed`, `clearStayCookie`. [S4] Depends on: T053, T034, T022
+- [x] T057 [Prioridad: Alta] [Milestone: M2] Crear `POST /api/reception/stays/[stayId]/close/route.ts`: auth `requireReception()`; `status=closed`, `clearStayCookie`. [S4] Depends on: T053, T034, T022
 
-- [ ] T058 [Prioridad: Alta] [Milestone: M2] Refactorizar `POST /api/capture/feedback` para usar `resolve-guest-stay-for-capture` (formal prevalece sobre efímero). Depends on: T054, T046
+- [x] T058 [Prioridad: Alta] [Milestone: M2] Refactorizar `POST /api/capture/feedback` para usar `resolve-guest-stay-for-capture` (formal prevalece sobre efímero). Depends on: T054, T046
 
 ### UI recepción
 
-- [ ] T059 [Prioridad: Alta] [Milestone: M2] Crear layout `app/(staff)/layout.tsx` con auth guard; rutas `/reception/*` exigen `canManageGuestStays()` (no todo `(staff)` genérico). [REUTILIZA F1: patrón `app/(admin)/layout.tsx`] Depends on: T022
+- [x] T059 [Prioridad: Alta] [Milestone: M2] Crear layout `app/(staff)/layout.tsx` con auth guard; rutas `/reception/*` exigen `canManageGuestStays()` (no todo `(staff)` genérico). [REUTILIZA F1: patrón `app/(admin)/layout.tsx`] Depends on: T022
 
-- [ ] T060 [Prioridad: Alta] [Milestone: M2] Crear `components/staff/StayGenerator.tsx` + página `app/(staff)/reception/page.tsx`: generar estadía formal, instrucciones operativas para recepcionista. **[DECISIÓN NEGOCIO]** copy UX check-in. Depends on: T055, T059
+- [x] T060 [Prioridad: Alta] [Milestone: M2] Crear `components/staff/StayGenerator.tsx` + página `app/(staff)/reception/page.tsx`: generar estadía formal, instrucciones operativas para recepcionista. **[DECISIÓN NEGOCIO]** copy UX check-in. Depends on: T055, T059
 
 ### Verificación M2
 
-- [ ] T061 [Prioridad: Alta] [Milestone: M2] Test SC-010 parcial: 100% `feedback_entries` tienen `guest_stay_id` NOT NULL tras flujos formal + walk-in + multi-empleado (G3). Depends on: T058, T060
+- [x] T061 [Prioridad: Alta] [Milestone: M2] Test SC-010 parcial: 100% `feedback_entries` tienen `guest_stay_id` NOT NULL tras flujos formal + walk-in + multi-empleado (G3). Depends on: T058, T060
 
-- [ ] T062 [Prioridad: Alta] [Milestone: M2] Test edge: checkout cierra stay; feedback post-cierre requiere nueva estadía; cookie formal prevalece si coexistía efímera en otro tab. Depends on: T057, T058
+- [x] T062 [Prioridad: Alta] [Milestone: M2] Test edge: checkout cierra stay; feedback post-cierre requiere nueva estadía; cookie formal prevalece si coexistía efímera en otro tab. Depends on: T057, T058
 
-- [ ] T063 [Prioridad: Media] [Milestone: M2] Validar quickstart escenarios 2–3 manualmente o E2E `tests/e2e/reception-stay.spec.ts`. Depends on: T060
+- [x] T063 [Prioridad: Media] [Milestone: M2] Validar quickstart escenarios 2–3 manualmente o E2E `tests/e2e/reception-stay.spec.ts`. Depends on: T060
 
 **Checkpoint M2**: SC-010 stay_id en 100% registros · Recepción operativa
 

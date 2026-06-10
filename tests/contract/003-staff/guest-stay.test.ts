@@ -203,6 +203,112 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
   );
 
   it(
+    "formal cookie prevails over prior ephemeral stay (T062)",
+    async () => {
+      const { createFormalStay } = await import(
+        "@/lib/stays/create-formal-stay"
+      );
+      const { openCaptureSession } = await import(
+        "@/lib/staff/open-capture-session"
+      );
+      const { submitFeedback } = await import("@/lib/capture/submit-feedback");
+
+      const venueId = await getPilotVenueId();
+      const fingerprint = `test-${Date.now()}-formal-prevails`;
+
+      const opened = await openCaptureSession({
+        staffTagSlug: "caribe-staff-maria-g",
+        clientFingerprint: fingerprint,
+      });
+      expect(opened).not.toBeNull();
+
+      const walkIn = await submitFeedback({
+        sessionToken: opened!.sessionToken,
+        rating: 3,
+        comment: "Walk-in sin check-in",
+        stayTokenFromCookie: null,
+      });
+
+      expect(walkIn.stay.stay_type).toBe("ephemeral");
+
+      const formal = await createFormalStay({
+        venueId,
+        createdByProfileId: null,
+      });
+
+      const fp2 = `test-${Date.now()}-formal-prevails-2`;
+      const opened2 = await openCaptureSession({
+        staffTagSlug: "caribe-staff-carlos-p",
+        clientFingerprint: fp2,
+      });
+
+      const withFormalCookie = await submitFeedback({
+        sessionToken: opened2!.sessionToken,
+        rating: 5,
+        comment: null,
+        stayTokenFromCookie: formal.stay_token,
+      });
+
+      expect(withFormalCookie.stay.id).toBe(formal.id);
+      expect(withFormalCookie.stay.stay_type).toBe("formal");
+      expect(withFormalCookie.stay.id).not.toBe(walkIn.stay.id);
+    },
+    30_000,
+  );
+
+  it(
+    "consolidated ephemeral token does not accept new records (T062)",
+    async () => {
+      const { openCaptureSession } = await import(
+        "@/lib/staff/open-capture-session"
+      );
+      const { submitFeedback } = await import("@/lib/capture/submit-feedback");
+      const { consolidateStays } = await import(
+        "@/lib/stays/consolidate-stays"
+      );
+
+      const venueId = await getPilotVenueId();
+      const fingerprint = `test-${Date.now()}-consolidated-reject`;
+
+      const opened = await openCaptureSession({
+        staffTagSlug: "caribe-staff-maria-g",
+        clientFingerprint: fingerprint,
+      });
+
+      const walkIn = await submitFeedback({
+        sessionToken: opened!.sessionToken,
+        rating: 4,
+        comment: null,
+        stayTokenFromCookie: null,
+      });
+
+      await consolidateStays({
+        ephemeralStayToken: walkIn.stay.stay_token,
+        venueId,
+        createdByProfileId: null,
+      });
+
+      const fp2 = `test-${Date.now()}-consolidated-reject-2`;
+      const opened2 = await openCaptureSession({
+        staffTagSlug: "caribe-staff-carlos-p",
+        clientFingerprint: fp2,
+      });
+
+      const afterConsolidation = await submitFeedback({
+        sessionToken: opened2!.sessionToken,
+        rating: 5,
+        comment: null,
+        stayTokenFromCookie: walkIn.stay.stay_token,
+      });
+
+      expect(afterConsolidation.stayCreated).toBe(true);
+      expect(afterConsolidation.stay.stay_type).toBe("ephemeral");
+      expect(afterConsolidation.stay.id).not.toBe(walkIn.stay.id);
+    },
+    30_000,
+  );
+
+  it(
     "SC-010 partial: feedback entries always have guest_stay_id after formal + walk-in",
     async () => {
       const { createFormalStay } = await import(
