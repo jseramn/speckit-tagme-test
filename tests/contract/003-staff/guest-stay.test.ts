@@ -253,7 +253,7 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
       expect(withFormalCookie.stay.stay_type).toBe("formal");
       expect(withFormalCookie.stay.id).not.toBe(walkIn.stay.id);
     },
-    30_000,
+    60_000,
   );
 
   it(

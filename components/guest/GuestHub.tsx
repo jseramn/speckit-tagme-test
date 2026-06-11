@@ -94,7 +94,10 @@ export function GuestHub({ payload }: GuestHubProps) {
 
       <header className="mb-8">
         {!roomContext.isRoom && (
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-tagme-gold">
+          <p
+            data-testid="guest-hub-zone"
+            className="text-xs font-medium uppercase tracking-[0.2em] text-tagme-gold"
+          >
             {zoneLabel(tag.zone, tag.roomNumber)}
           </p>
         )}

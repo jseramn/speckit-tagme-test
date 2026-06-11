@@ -1,36 +1,32 @@
 import { test, expect } from "@playwright/test";
+import { gotoApp } from "./helpers/navigation";
+import { guestHubZone, roomWelcomeHeading } from "./helpers/locators";
 
 test.describe("Room context (M4)", () => {
   test("caribe-room-412 shows room banner and room service", async ({
     page,
   }) => {
-    await page.goto("/t/caribe-room-412");
+    await gotoApp(page, "/t/caribe-room-412");
 
-    await expect(
-      page.getByRole("heading", {
-        name: /Bienvenido a la habitación 412/i,
-      }),
-    ).toBeVisible();
+    await expect(roomWelcomeHeading(page, "412")).toBeVisible();
 
     await expect(
       page.getByText("Su estancia", { exact: true }),
     ).toBeVisible();
     await expect(page.getByText(/Suite muralla/i)).toBeVisible();
     await expect(page.getByText(/Servicio a la habitación/i)).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Su habitación" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Su habitación" }),
+    ).toBeVisible();
   });
 
   test("caribe-lobby does not show room banner", async ({ page }) => {
-    await page.goto("/t/caribe-lobby");
+    await gotoApp(page, "/t/caribe-lobby");
 
     await expect(
-      page.getByRole("heading", {
-        name: /Bienvenido a la habitación/i,
-      }),
+      page.getByRole("heading", { name: /Bienvenido a la habitación/i }),
     ).toHaveCount(0);
-    await expect(
-      page.getByText("Lobby", { exact: true }),
-    ).toBeVisible();
+    await expect(guestHubZone(page)).toHaveText("Lobby");
   });
 
   test("all pilot room tags resolve room context", async ({ page }) => {
@@ -43,12 +39,8 @@ test.describe("Room context (M4)", () => {
     ];
 
     for (const { slug, room } of roomTags) {
-      await page.goto(`/t/${slug}`);
-      await expect(
-        page.getByRole("heading", {
-          name: new RegExp(`Bienvenido a la habitación ${room}`, "i"),
-        }),
-      ).toBeVisible();
+      await gotoApp(page, `/t/${slug}`);
+      await expect(roomWelcomeHeading(page, room)).toBeVisible();
     }
   });
 });

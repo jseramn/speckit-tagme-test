@@ -179,5 +179,5 @@ describe.skipIf(!hasInsforge)("guest capture feedback integration (T027, T048)",
 
     expect(stay?.stay_type).toBe("ephemeral");
     expect(stay?.status).toBe("active");
-  });
+  }, 30_000);
 });

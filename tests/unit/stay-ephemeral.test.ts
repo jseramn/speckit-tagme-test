@@ -43,7 +43,7 @@ describe.skipIf(!hasInsforge)("stay ephemeral behavior (T052)", () => {
     const reused = await resolveGuestStayForCapture(venueId, first.stay_token);
     expect(reused.created).toBe(false);
     expect(reused.stay.id).toBe(first.id);
-  });
+  }, 30_000);
 
   it("lazy-expires past-TTL stay and creates a new ephemeral", async () => {
     const { createInsforgeServerClient } = await import(

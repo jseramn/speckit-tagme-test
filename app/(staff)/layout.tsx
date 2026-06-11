@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { loginRedirectPath } from "@/lib/auth/login-redirect";
 import { getSession } from "@/lib/auth/session";
 
 export default async function StaffLayout({
@@ -9,7 +10,7 @@ export default async function StaffLayout({
   const session = await getSession();
 
   if (!session) {
-    redirect("/login?next=/reception");
+    redirect(await loginRedirectPath("/reception"));
   }
 
   return (
