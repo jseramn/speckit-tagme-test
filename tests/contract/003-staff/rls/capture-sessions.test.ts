@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  expectRlsSelectDenied,
+  expectRlsWriteNoEffect,
   getServiceClient,
   hasRlsTestEnv,
   skipIfNoRole,
 } from "../helpers/jwt-mock";
 
-const describeRls = hasRlsTestEnv() ? describe : describe.skip;
-
-describeRls("staff_capture_sessions RLS (T117)", () => {
+describe.skipIf(!hasRlsTestEnv())("staff_capture_sessions RLS (T117)", () => {
   it("service role can INSERT and SELECT sessions", async () => {
     const service = getServiceClient();
 
@@ -74,8 +74,7 @@ describeRls("staff_capture_sessions RLS (T117)", () => {
       .select("id")
       .limit(1);
 
-    expect(error).toBeTruthy();
-    expect(data).toBeNull();
+    expectRlsSelectDenied({ data, error });
   });
 
   it("authenticated supervisor cannot INSERT capture sessions", async () => {
@@ -111,8 +110,7 @@ describeRls("staff_capture_sessions RLS (T117)", () => {
       .eq("status", "active")
       .select("id");
 
-    expect(error).toBeTruthy();
-    expect(data).toBeNull();
+    expectRlsWriteNoEffect({ data, error });
   });
 
   it("admin can SELECT capture sessions at pilot venue", async () => {

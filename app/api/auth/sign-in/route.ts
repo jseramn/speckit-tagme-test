@@ -43,7 +43,11 @@ export async function POST(request: Request) {
     );
   }
 
-  const response = NextResponse.json({ user: data.user });
+  // access_token in JSON supports RLS contract tests and CLI tooling; browser sessions stay cookie-based.
+  const response = NextResponse.json({
+    user: data.user,
+    access_token: data.accessToken,
+  });
   setAuthCookies(response.cookies, {
     accessToken: data.accessToken,
     refreshToken: data.refreshToken,

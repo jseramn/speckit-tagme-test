@@ -1,12 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  expectRlsSelectDenied,
   hasRlsTestEnv,
   skipIfNoRole,
 } from "../helpers/jwt-mock";
 
-const describeRls = hasRlsTestEnv() ? describe : describe.skip;
-
-describeRls("staff role RLS matrix (T025)", () => {
+describe.skipIf(!hasRlsTestEnv())("staff role RLS matrix (T025)", () => {
   it("staff can SELECT own feedback via staff_member_id_for_user scope", async () => {
     const staff = skipIfNoRole("staff");
     if (!staff) return;
@@ -28,8 +27,7 @@ describeRls("staff role RLS matrix (T025)", () => {
       .select("id")
       .limit(1);
 
-    expect(error).toBeTruthy();
-    expect(data).toBeNull();
+    expectRlsSelectDenied({ data, error });
   });
 
   it("staff cannot INSERT feedback_entries directly (service role only)", async () => {

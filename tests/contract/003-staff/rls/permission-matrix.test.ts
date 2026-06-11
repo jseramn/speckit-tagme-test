@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
+  expectRlsSelectDenied,
   getServiceClient,
   hasRlsTestEnv,
   skipIfNoRole,
 } from "../helpers/jwt-mock";
 
-const describeRls = hasRlsTestEnv() ? describe : describe.skip;
-
-describeRls("permission matrix regression TR-02 (T077)", () => {
+describe.skipIf(!hasRlsTestEnv())("permission matrix regression TR-02 (T077)", () => {
   it("staff can SELECT own feedback but not incidents", async () => {
     const staff = skipIfNoRole("staff");
     if (!staff) return;
@@ -22,7 +21,7 @@ describeRls("permission matrix regression TR-02 (T077)", () => {
       .from("incident_reports")
       .select("id")
       .limit(1);
-    expect(incidents.error).toBeTruthy();
+    expectRlsSelectDenied(incidents);
   });
 
   it("supervisor can SELECT incidents and venue_incident_categories", async () => {

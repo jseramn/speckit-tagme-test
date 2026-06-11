@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  expectRlsSelectDenied,
+  getRoleAuthUserId,
   getServiceClient,
   hasRlsTestEnv,
   skipIfNoRole,
 } from "../helpers/jwt-mock";
 
-const describeRls = hasRlsTestEnv() ? describe : describe.skip;
-
-describeRls("supervisor role incident RLS (T066)", () => {
+describe.skipIf(!hasRlsTestEnv())("supervisor role incident RLS (T066)", () => {
   it("supervisor can SELECT incidents in assigned department scope", async () => {
     const supervisor = skipIfNoRole("supervisor");
     if (!supervisor) return;
@@ -48,11 +48,13 @@ describeRls("supervisor role incident RLS (T066)", () => {
     const service = getServiceClient();
     if (!supervisor) return;
 
+    const authUserId = getRoleAuthUserId("supervisor");
+    if (!authUserId) return;
+
     const { data: profile } = await service.database
       .from("user_profiles")
       .select("id, venue_id")
-      .eq("role", "supervisor")
-      .limit(1)
+      .eq("auth_user_id", authUserId)
       .maybeSingle();
 
     if (!profile?.id) return;
@@ -156,7 +158,6 @@ describeRls("supervisor role incident RLS (T066)", () => {
       .select("id")
       .limit(1);
 
-    expect(error).toBeTruthy();
-    expect(data).toBeNull();
+    expectRlsSelectDenied({ data, error });
   });
 });
