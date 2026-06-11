@@ -7,6 +7,7 @@
  */
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import type { Database } from "@insforge/sdk";
 
 function loadEnvFile(filename: string): void {
   const filepath = resolve(process.cwd(), filename);
@@ -32,16 +33,7 @@ function loadEnvFile(filename: string): void {
 loadEnvFile(".env.local");
 
 async function countOrphans(
-  db: {
-    from: (
-      table: string,
-    ) => {
-      select: (
-        cols: string,
-        opts?: { count: string; head: boolean },
-      ) => { or: (cond: string) => Promise<{ count: number | null; error: { message: string } | null }> };
-    };
-  },
+  db: Database,
   table: string,
   conditions: string,
 ): Promise<number> {
