@@ -49,7 +49,7 @@ export async function listFeedbackComments(
     await assertDepartmentFilterAccess(session, options.departmentId);
   }
 
-  let query = insforge.database
+  const query = insforge.database
     .from("feedback_entries")
     .select(
       `
