@@ -225,41 +225,41 @@ description: "Lista de tareas TagMe Fase 3 — Staff & Feedback Operativo (miles
 
 ### Tests
 
-- [ ] T064 [Prioridad: Alta] [Milestone: M3] Contract test incidencia en `tests/contract/003-staff/guest-capture-incident.test.ts`: sin campo `rating`; categorías válidas. [S3] Depends on: T021
+- [x] T064 [Prioridad: Alta] [Milestone: M3] Contract test incidencia en `tests/contract/003-staff/guest-capture-incident.test.ts`: sin campo `rating`; categorías válidas. [S3] Depends on: T021
 
-- [ ] T065 [Prioridad: Alta] [Milestone: M3] Contract test supervisor incidencias en `tests/contract/003-staff/supervisor-incidents.test.ts` según `contracts/supervisor-api.md`. [V2] Depends on: T021
+- [x] T065 [Prioridad: Alta] [Milestone: M3] Contract test supervisor incidencias en `tests/contract/003-staff/supervisor-incidents.test.ts` según `contracts/supervisor-api.md`. [V2] Depends on: T021
 
-- [ ] T066 [Prioridad: Alta] [Milestone: M3] Tests RLS supervisor en `tests/contract/003-staff/rls/supervisor-role.test.ts`: SELECT/UPDATE incidencias solo depto asignado; INSERT `incident_status_history` en cada cambio. Depends on: T025
+- [x] T066 [Prioridad: Alta] [Milestone: M3] Tests RLS supervisor en `tests/contract/003-staff/rls/supervisor-role.test.ts`: SELECT/UPDATE incidencias solo depto asignado; INSERT `incident_status_history` en cada cambio. Depends on: T025
 
 ### Captura incidencia huésped
 
-- [ ] T067 [Prioridad: Alta] [Milestone: M3] Crear `components/capture/IncidentForm.tsx`: categoría (desde `venue_incident_categories`), descripción, prioridad sugerida por categoría + override huésped. **[DECISIÓN NEGOCIO]** labels categorías Caribe. Depends on: T040
+- [x] T067 [Prioridad: Alta] [Milestone: M3] Crear `components/capture/IncidentForm.tsx`: categoría (desde `venue_incident_categories`), descripción, prioridad sugerida por categoría + override huésped. **[DECISIÓN NEGOCIO]** labels categorías Caribe. Depends on: T040
 
-- [ ] T068 [Prioridad: Alta] [Milestone: M3] Implementar `submitIncident()` en `lib/capture/submit-incident.ts`: pipeline separado, `origin_type=staff_nfc`, ruteo `department_id` por categoría, estado `abierta`. [NUEVO] Depends on: T033, T054
+- [x] T068 [Prioridad: Alta] [Milestone: M3] Implementar `submitIncident()` en `lib/capture/submit-incident.ts`: pipeline separado, `origin_type=staff_nfc`, ruteo `department_id` por categoría, estado `abierta`. [NUEVO] Depends on: T033, T054
 
-- [ ] T069 [Prioridad: Alta] [Milestone: M3] Crear `POST /api/capture/incident/route.ts` con validación Zod, INSERT `incident_reports` + history inicial, completar sesión staff. [S3] Depends on: T068
+- [x] T069 [Prioridad: Alta] [Milestone: M3] Crear `POST /api/capture/incident/route.ts` con validación Zod, INSERT `incident_reports` + history inicial, completar sesión staff. [S3] Depends on: T068
 
-- [ ] T070 [Prioridad: Alta] [Milestone: M3] Habilitar rama Incidencia en `CaptureChoice.tsx` y `capture/[sessionToken]/page.tsx` (ya no placeholder). Depends on: T067, T069
+- [x] T070 [Prioridad: Alta] [Milestone: M3] Habilitar rama Incidencia en `CaptureChoice.tsx` y `capture/[sessionToken]/page.tsx` (ya no placeholder). Depends on: T067, T069
 
 ### lib/supervisor + API bandeja
 
-- [ ] T071 [Prioridad: Alta] [Milestone: M3] Implementar `lib/supervisor/incident-routing.ts`: mapeo categoría → `default_department_id` + prioridad default. [NUEVO] Depends on: T009
+- [x] T071 [Prioridad: Alta] [Milestone: M3] Implementar `lib/supervisor/incident-routing.ts`: mapeo categoría → `default_department_id` + prioridad default. [NUEVO] Depends on: T009
 
-- [ ] T072 [Prioridad: Alta] [Milestone: M3] Implementar `lib/supervisor/department-scope.ts`: wrapper `assertDepartmentAccess(departmentId)` usando RLS helpers. [NUEVO] Depends on: T011
+- [x] T072 [Prioridad: Alta] [Milestone: M3] Implementar `lib/supervisor/department-scope.ts`: wrapper `assertDepartmentAccess(departmentId)` usando RLS helpers. [NUEVO] Depends on: T011
 
-- [ ] T073 [Prioridad: Alta] [Milestone: M3] Crear `GET /api/supervisor/incidents/route.ts` con filtros status/depto/categoría; scope supervisor vs manager. [V2] Depends on: T071, T072, T022
+- [x] T073 [Prioridad: Alta] [Milestone: M3] Crear `GET /api/supervisor/incidents/route.ts` con filtros status/depto/categoría; scope supervisor vs manager. [V2] Depends on: T071, T072, T022
 
-- [ ] T074 [Prioridad: Alta] [Milestone: M3] Crear `PATCH /api/supervisor/incidents/[id]/route.ts`: transiciones válidas, INSERT `incident_status_history`, validación `changed_by`. [V2] Depends on: T073
+- [x] T074 [Prioridad: Alta] [Milestone: M3] Crear `PATCH /api/supervisor/incidents/[id]/route.ts`: transiciones válidas, INSERT `incident_status_history`, validación `changed_by`. [V2] Depends on: T073
 
 ### UI supervisor incidencias
 
-- [ ] T075 [Prioridad: Alta] [Milestone: M3] Crear `components/supervisor/IncidentStatusBadge.tsx` y `components/supervisor/IncidentInbox.tsx` con badge conteo abiertas. [NUEVO] Depends on: T073
+- [x] T075 [Prioridad: Alta] [Milestone: M3] Crear `components/supervisor/IncidentStatusBadge.tsx` y `components/supervisor/IncidentInbox.tsx` con badge conteo abiertas. [NUEVO] Depends on: T073
 
-- [ ] T076 [Prioridad: Alta] [Milestone: M3] Crear layout `app/(supervisor)/layout.tsx` + página `app/(supervisor)/incidents/page.tsx` con bandeja, filtros y acciones de estado. [REUTILIZA F1: patrones `app/(admin)/`] Depends on: T075, T074
+- [x] T076 [Prioridad: Alta] [Milestone: M3] Crear layout `app/(supervisor)/layout.tsx` + página `app/(supervisor)/incidents/page.tsx` con bandeja, filtros y acciones de estado. [REUTILIZA F1: patrones `app/(admin)/`] Depends on: T075, T074
 
-- [ ] T077 [Prioridad: Media] [Milestone: M3] Test regresión TR-02: matriz permisos completa en `tests/contract/003-staff/rls/permission-matrix.test.ts` (scorecard, comentarios, incidencias, config). Depends on: T066
+- [x] T077 [Prioridad: Media] [Milestone: M3] Test regresión TR-02: matriz permisos completa en `tests/contract/003-staff/rls/permission-matrix.test.ts` (scorecard, comentarios, incidencias, config). Depends on: T066
 
-- [ ] T078 [Prioridad: Alta] [Milestone: M3] Verificar SC-007/SC-008: incidencia visible ≤60s; workflow 4 estados con 3+ filas history. Depends on: T076
+- [x] T078 [Prioridad: Alta] [Milestone: M3] Verificar SC-007/SC-008: incidencia visible ≤60s; workflow 4 estados con 3+ filas history. Depends on: T076
 
 **Checkpoint M3**: Feedback ≠ Incidencia end-to-end · Principio IV completo · V2 operativo
 

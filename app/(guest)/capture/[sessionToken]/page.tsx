@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CaptureFlow } from "@/components/capture/CaptureFlow";
 import { SessionExpired } from "@/components/capture/SessionExpired";
+import { listActiveIncidentCategories } from "@/lib/supervisor/incident-routing";
 import { validateSession } from "@/lib/staff/validate-session";
 
 export const runtime = "nodejs";
@@ -44,11 +45,18 @@ export default async function CapturePage({ params }: CapturePageProps) {
     return <SessionExpired message={session.message} />;
   }
 
+  const categories = await listActiveIncidentCategories(session.venueId);
+
   return (
     <CaptureFlow
       sessionToken={session.sessionToken}
       expiresAt={session.expiresAt}
       staff={session.staff}
+      incidentCategories={categories.map((cat) => ({
+        code: cat.code,
+        label: cat.label,
+        defaultPriority: cat.defaultPriority,
+      }))}
     />
   );
 }

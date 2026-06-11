@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/Button";
 
 export interface CaptureChoiceProps {
   onSelectFeedback: () => void;
+  onSelectIncident: () => void;
   disabled?: boolean;
 }
 
 export function CaptureChoice({
   onSelectFeedback,
+  onSelectIncident,
   disabled = false,
 }: CaptureChoiceProps) {
   return (
@@ -30,19 +32,18 @@ export function CaptureChoice({
         </span>
       </Button>
 
-      <button
+      <Button
         type="button"
-        disabled
-        aria-disabled="true"
-        className="w-full rounded-xl border border-tagme-slate/10 bg-white/50 px-5 py-4 text-left opacity-60"
+        variant="secondary"
+        className="h-auto w-full flex-col items-start gap-1 px-5 py-4 text-left"
+        onClick={onSelectIncident}
+        disabled={disabled}
       >
-        <span className="block text-base font-semibold text-tagme-ink">
-          Incidencia
+        <span className="text-base font-semibold">Incidencia</span>
+        <span className="text-xs font-normal text-tagme-slate/70">
+          Reporta un problema que requiere atención del hotel
         </span>
-        <span className="mt-1 block text-xs text-tagme-slate/60">
-          Próximamente
-        </span>
-      </button>
+      </Button>
     </div>
   );
 }

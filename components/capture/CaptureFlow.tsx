@@ -5,25 +5,31 @@ import type { StaffSessionContext } from "@/lib/staff/types";
 import { CaptureChoice } from "./CaptureChoice";
 import { CaptureConfirmation } from "./CaptureConfirmation";
 import { FeedbackForm } from "./FeedbackForm";
+import { IncidentForm, type IncidentCategoryOption } from "./IncidentForm";
 import { SessionCountdown } from "./SessionCountdown";
 
-type CaptureStep = "choice" | "feedback" | "confirmation";
+type CaptureStep = "choice" | "feedback" | "incident" | "confirmation";
 
 export interface CaptureFlowProps {
   sessionToken: string;
   expiresAt: string;
   staff: StaffSessionContext;
+  incidentCategories: IncidentCategoryOption[];
 }
 
 export function CaptureFlow({
   sessionToken,
   expiresAt,
   staff,
+  incidentCategories,
 }: CaptureFlowProps) {
   const [step, setStep] = useState<CaptureStep>("choice");
   const [sessionExpired, setSessionExpired] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState(
     "¡Gracias por tu opinión!",
+  );
+  const [confirmationDetail, setConfirmationDetail] = useState(
+    "Tu comentario nos ayuda a mejorar la experiencia en el hotel.",
   );
 
   return (
@@ -52,6 +58,7 @@ export function CaptureFlow({
         {step === "choice" && (
           <CaptureChoice
             onSelectFeedback={() => setStep("feedback")}
+            onSelectIncident={() => setStep("incident")}
             disabled={sessionExpired}
           />
         )}
@@ -62,6 +69,25 @@ export function CaptureFlow({
             disabled={sessionExpired}
             onSuccess={(message) => {
               setConfirmationMessage(message);
+              setConfirmationDetail(
+                "Tu comentario nos ayuda a mejorar la experiencia en el hotel.",
+              );
+              setStep("confirmation");
+            }}
+            onBack={() => setStep("choice")}
+          />
+        )}
+
+        {step === "incident" && (
+          <IncidentForm
+            sessionToken={sessionToken}
+            categories={incidentCategories}
+            disabled={sessionExpired}
+            onSuccess={(message) => {
+              setConfirmationMessage(message);
+              setConfirmationDetail(
+                "Nuestro equipo de servicio revisará tu reporte a la brevedad.",
+              );
               setStep("confirmation");
             }}
             onBack={() => setStep("choice")}
@@ -69,7 +95,10 @@ export function CaptureFlow({
         )}
 
         {step === "confirmation" && (
-          <CaptureConfirmation message={confirmationMessage} />
+          <CaptureConfirmation
+            message={confirmationMessage}
+            detail={confirmationDetail}
+          />
         )}
       </section>
     </div>

@@ -1,9 +1,11 @@
 export interface CaptureConfirmationProps {
   message?: string;
+  detail?: string;
 }
 
 export function CaptureConfirmation({
   message = "¡Gracias por tu opinión!",
+  detail = "Tu comentario nos ayuda a mejorar la experiencia en el hotel.",
 }: CaptureConfirmationProps) {
   return (
     <div className="rounded-2xl border border-tagme-gold/20 bg-white/80 px-6 py-8 text-center">
@@ -15,7 +17,7 @@ export function CaptureConfirmation({
       </div>
       <h2 className="text-xl font-semibold text-tagme-ink">{message}</h2>
       <p className="mt-3 text-sm leading-relaxed text-tagme-slate/75">
-        Tu comentario nos ayuda a mejorar la experiencia en el hotel.
+        {detail}
       </p>
     </div>
   );

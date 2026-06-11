@@ -279,6 +279,24 @@ export async function requireSupervisor(
   return session;
 }
 
+/** Panel incidencias: supervisor (depto asignado), manager o admin. */
+export async function requireSupervisorPanel(
+  request?: NextRequest,
+): Promise<StaffSession> {
+  const session = await requireStaff(request);
+  if (
+    session.role !== "supervisor" &&
+    session.role !== "manager" &&
+    session.role !== "admin"
+  ) {
+    throw new AuthError(
+      "FORBIDDEN",
+      "Se requiere rol supervisor, manager o admin",
+    );
+  }
+  return session;
+}
+
 export async function requireManager(
   request?: NextRequest,
 ): Promise<StaffSession> {
