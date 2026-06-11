@@ -82,7 +82,8 @@ SELECT
   (COUNT(*) < COALESCE(vss.min_feedbacks_for_nps, 6)) AS insufficient_data
 FROM public.v_feedback_base fb
 LEFT JOIN public.venue_staff_settings vss ON vss.venue_id = fb.venue_id
-WHERE fb.staff_member_id IS NOT NULL
+WHERE fb.origin_type = 'staff_nfc'
+  AND fb.staff_member_id IS NOT NULL
 GROUP BY
   fb.venue_id,
   fb.staff_member_id,
@@ -117,7 +118,8 @@ SELECT
   (COUNT(*) < COALESCE(vss.min_feedbacks_for_nps, 6)) AS insufficient_data
 FROM public.v_feedback_base fb
 LEFT JOIN public.venue_staff_settings vss ON vss.venue_id = fb.venue_id
-WHERE fb.shift_id IS NOT NULL
+WHERE fb.origin_type = 'staff_nfc'
+  AND fb.shift_id IS NOT NULL
 GROUP BY
   fb.venue_id,
   fb.department_id,

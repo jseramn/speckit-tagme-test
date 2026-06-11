@@ -313,37 +313,37 @@ description: "Lista de tareas TagMe Fase 3 — Staff & Feedback Operativo (miles
 
 ### lib/scorecards
 
-- [ ] T089 [Prioridad: Alta] [Milestone: M5] Implementar `lib/scorecards/calc-nps.ts` y `lib/scorecards/aggregate-ratings.ts`: NPS = %5★ − %1–2★; `insufficientData` si n< threshold. [NUEVO] Depends on: T020
+- [x] T089 [Prioridad: Alta] [Milestone: M5] Implementar `lib/scorecards/calc-nps.ts` y `lib/scorecards/aggregate-ratings.ts`: NPS = %5★ − %1–2★; `insufficientData` si n< threshold. [NUEVO] Depends on: T020
 
-- [ ] T090 [Prioridad: Alta] [Milestone: M5] Implementar `lib/scorecards/parse-period.ts` y `lib/scorecards/get-nps-threshold.ts` (desde `venue_staff_settings.min_feedbacks_for_nps`). Depends on: T089
+- [x] T090 [Prioridad: Alta] [Milestone: M5] Implementar `lib/scorecards/parse-period.ts` y `lib/scorecards/get-nps-threshold.ts` (desde `venue_staff_settings.min_feedbacks_for_nps`). Depends on: T089
 
-- [ ] T091 [Prioridad: Alta] [Milestone: M5] Implementar `lib/scorecards/query-employee.ts`, `query-department.ts`, `query-hotel.ts` filtrando `v_feedback_base` por periodo; `trend7d`; ranking con `insufficientData` por empleado. Depends on: T019, T090
+- [x] T091 [Prioridad: Alta] [Milestone: M5] Implementar `lib/scorecards/query-employee.ts`, `query-department.ts`, `query-hotel.ts` filtrando `v_feedback_base` por periodo; `trend7d`; ranking con `insufficientData` por empleado. Depends on: T019, T090
 
-- [ ] T092 [Prioridad: Alta] [Milestone: M5] Implementar `lib/scorecards/assert-scorecard-access.ts` + `map-response.ts` según matriz Q2=B y contrato (staff sin comentarios ajenos). Depends on: T091, T022
+- [x] T092 [Prioridad: Alta] [Milestone: M5] Implementar `lib/scorecards/assert-scorecard-access.ts` + `map-response.ts` según matriz Q2=B y contrato (staff sin comentarios ajenos). Depends on: T091, T022
 
 ### API scorecards
 
-- [ ] T093 [Prioridad: Alta] [Milestone: M5] Crear validadores `lib/validators/scorecards.ts` y rutas `GET /api/scorecards/employee/[staffMemberId]`, `department/[departmentId]`, `hotel/route.ts`. [NUEVO] Depends on: T092
+- [x] T093 [Prioridad: Alta] [Milestone: M5] Crear validadores `lib/validators/scorecards.ts` y rutas `GET /api/scorecards/employee/[staffMemberId]`, `department/[departmentId]`, `hotel/route.ts`. [NUEVO] Depends on: T092
 
-- [ ] T094 [Prioridad: Media] [Milestone: M5] Crear `GET /api/metrics/feedback-summary/route.ts` enrichment Fase 2 con `signalType: direct_feedback` [REUTILIZA F2: endpoint metrics existente]. Depends on: T091
+- [x] T094 [Prioridad: Media] [Milestone: M5] Crear `GET /api/metrics/feedback-summary/route.ts` enrichment Fase 2 con `signalType: direct_feedback` [REUTILIZA F2: endpoint metrics existente]. Depends on: T091
 
 ### UI scorecards
 
-- [ ] T095 [Prioridad: Alta] [Milestone: M5] Crear `components/supervisor/ScorecardCard.tsx`, `PeriodSelector.tsx`, `ScorecardDrillDown.tsx` con manejo TR-07 (sin turno asignado). [V1] Depends on: T093
+- [x] T095 [Prioridad: Alta] [Milestone: M5] Crear `components/supervisor/ScorecardCard.tsx`, `PeriodSelector.tsx`, `ScorecardDrillDown.tsx` con manejo TR-07 (sin turno asignado). [V1] Depends on: T093
 
-- [ ] T096 [Prioridad: Alta] [Milestone: M5] Crear `app/(staff)/my-scorecard/page.tsx` (S5): NPS propio si n≥6; mensaje insuficiente; sin comentarios de terceros. Depends on: T095
+- [x] T096 [Prioridad: Alta] [Milestone: M5] Crear `app/(staff)/my-scorecard/page.tsx` (S5): NPS propio si n≥6; mensaje insuficiente; sin comentarios de terceros. Depends on: T095
 
-- [ ] T097 [Prioridad: Alta] [Milestone: M5] Crear `app/(supervisor)/scorecards/page.tsx` + widget pulso en `app/(supervisor)/dashboard/page.tsx`. [V1, M1] Depends on: T095
+- [x] T097 [Prioridad: Alta] [Milestone: M5] Crear `app/(supervisor)/scorecards/page.tsx` + widget pulso en `app/(supervisor)/pulse/page.tsx` (ruta `/pulse`; evita colisión con admin `/dashboard`). [V1, M1] Depends on: T095
 
 ### Tests scorecards
 
-- [ ] T098 [Prioridad: Alta] [Milestone: M5] Unit tests `tests/unit/scorecards-nps.test.ts`: boundary n=5 vs n=6, solo promoters, solo detractors. Depends on: T089
+- [x] T098 [Prioridad: Alta] [Milestone: M5] Unit tests `tests/unit/scorecards-nps.test.ts`: boundary n=5 vs n=6, solo promoters, solo detractors. Depends on: T089
 
-- [ ] T099 [Prioridad: Alta] [Milestone: M5] Unit test `tests/unit/scorecards-shift-null.test.ts`: feedback con `shift_id: null` en employee/dept sí cuenta; excluido de `v_scorecard_shift`. Depends on: T091
+- [x] T099 [Prioridad: Alta] [Milestone: M5] Unit test `tests/unit/scorecards-shift-null.test.ts`: feedback con `shift_id: null` en employee/dept sí cuenta; excluido de `v_scorecard_shift`. Depends on: T091
 
-- [ ] T100 [Prioridad: Alta] [Milestone: M5] Contract tests `tests/contract/003-staff/scorecards.test.ts` + `scorecards-auth.test.ts`: staff 403 en otro empleado; supervisor 403 fuera de depto. Depends on: T093
+- [x] T100 [Prioridad: Alta] [Milestone: M5] Contract tests `tests/contract/003-staff/scorecards.test.ts` + `scorecards-auth.test.ts`: staff 403 en otro empleado; supervisor 403 fuera de depto. Depends on: T093
 
-- [ ] T101 [Prioridad: Alta] [Milestone: M5] Seed ≥6 feedbacks/empleado piloto + E2E `tests/e2e/staff-scorecard.spec.ts`: NFC → feedback → scorecard actualizado ≤60s (SC-004). Depends on: T096, T024
+- [x] T101 [Prioridad: Alta] [Milestone: M5] Seed ≥6 feedbacks/empleado piloto + E2E `tests/e2e/staff-scorecard.spec.ts`: NFC → feedback → scorecard actualizado ≤60s (SC-004). Depends on: T096, T024
 
 **Checkpoint M5**: SC-004, SC-009 · Principio VII verificado · Jerarquía completa
 

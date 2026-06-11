@@ -4,7 +4,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { StaffSession } from "@/lib/auth/session";
 
-const NAV_ITEMS = [{ href: "/incidents", label: "Incidencias" }];
+const NAV_ITEMS = [
+  { href: "/pulse", label: "Pulso" },
+  { href: "/scorecards", label: "Scorecards" },
+  { href: "/incidents", label: "Incidencias" },
+];
 
 interface SupervisorSidebarProps {
   session: StaffSession;

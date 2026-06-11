@@ -84,7 +84,8 @@ SELECT
   (COUNT(*) < COALESCE(vss.min_feedbacks_for_nps, 6)) AS insufficient_data
 FROM public.v_feedback_base fb
 LEFT JOIN public.venue_staff_settings vss ON vss.venue_id = fb.venue_id
-WHERE fb.staff_member_id IS NOT NULL
+WHERE fb.origin_type = 'staff_nfc'
+  AND fb.staff_member_id IS NOT NULL
 GROUP BY
   fb.venue_id,
   fb.staff_member_id,
@@ -94,7 +95,7 @@ GROUP BY
   vss.min_feedbacks_for_nps;
 
 COMMENT ON VIEW public.v_scorecard_employee IS
-  'Scorecard por empleado/día con NPS interno (n≥6)';
+  'Scorecard empleado; solo origin_type=staff_nfc (excluye room_nfc)';
 
 -- ---------------------------------------------------------------------------
 -- v_scorecard_shift (T018) — excludes shift_id IS NULL
@@ -119,7 +120,8 @@ SELECT
   (COUNT(*) < COALESCE(vss.min_feedbacks_for_nps, 6)) AS insufficient_data
 FROM public.v_feedback_base fb
 LEFT JOIN public.venue_staff_settings vss ON vss.venue_id = fb.venue_id
-WHERE fb.shift_id IS NOT NULL
+WHERE fb.origin_type = 'staff_nfc'
+  AND fb.shift_id IS NOT NULL
 GROUP BY
   fb.venue_id,
   fb.department_id,
@@ -128,7 +130,7 @@ GROUP BY
   vss.min_feedbacks_for_nps;
 
 COMMENT ON VIEW public.v_scorecard_shift IS
-  'Roll-up turno; excluye registros sin shift_id (Q1=B)';
+  'Roll-up turno; solo staff_nfc con shift_id (excluye room_nfc y sin turno)';
 
 -- ---------------------------------------------------------------------------
 -- v_scorecard_department (T018)
