@@ -2,16 +2,19 @@ import { headers } from "next/headers";
 import { NextRequest } from "next/server";
 import { createInsforgeServerClient } from "@/lib/insforge-server";
 import { createInsforgeSsrClient } from "@/lib/insforge-ssr";
+import type { StaffRole } from "@/types/staff";
 
-export type StaffRole = "staff" | "admin" | "ops";
+export type { StaffRole };
 
 export interface StaffSession {
   userId: string;
+  profileId: string | null;
   role: StaffRole;
   venueId: string | null;
   venueName: string | null;
   venueSlug: string | null;
   displayName: string;
+  staffMemberId: string | null;
 }
 
 export class AuthError extends Error {
@@ -25,6 +28,7 @@ export class AuthError extends Error {
 }
 
 interface UserProfileRow {
+  id: string;
   auth_user_id: string;
   venue_id: string | null;
   role: StaffRole;
@@ -37,15 +41,34 @@ function firstRelation<T>(value: T | T[] | null | undefined): T | null {
   return Array.isArray(value) ? (value[0] ?? null) : value;
 }
 
-function mapProfile(row: UserProfileRow): StaffSession {
+async function resolveStaffMemberId(
+  profileId: string | null,
+): Promise<string | null> {
+  if (!profileId) return null;
+
+  const insforge = createInsforgeServerClient();
+  const { data } = await insforge.database
+    .from("staff_members")
+    .select("id")
+    .eq("user_profile_id", profileId)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  return (data?.id as string) ?? null;
+}
+
+async function mapProfile(row: UserProfileRow): Promise<StaffSession> {
   const venue = firstRelation(row.venues);
+  const staffMemberId = await resolveStaffMemberId(row.id);
   return {
     userId: row.auth_user_id,
+    profileId: row.id,
     role: row.role,
     venueId: row.venue_id,
     venueName: venue?.name ?? null,
     venueSlug: venue?.slug ?? null,
     displayName: row.display_name,
+    staffMemberId,
   };
 }
 
@@ -58,6 +81,7 @@ async function fetchProfileByAuthUserId(
     .from("user_profiles")
     .select(
       `
+      id,
       auth_user_id,
       venue_id,
       role,
@@ -87,11 +111,13 @@ async function devTokenSession(token: string): Promise<StaffSession | null> {
 
   return {
     userId: "dev-staff",
+    profileId: null,
     role: (process.env.STAFF_DEV_ROLE as StaffRole) || "admin",
     venueId: (venue?.id as string) ?? null,
     venueName: (venue?.name as string) ?? "Hotel Caribe (dev)",
     venueSlug: (venue?.slug as string) ?? venueSlug,
     displayName: process.env.STAFF_DEV_NAME?.trim() || "Staff Dev",
+    staffMemberId: process.env.STAFF_DEV_STAFF_MEMBER_ID?.trim() || null,
   };
 }
 
@@ -206,4 +232,111 @@ export function authErrorResponse(error: unknown) {
     );
   }
   return null;
+}
+
+async function isReceptionStaffMember(staffMemberId: string): Promise<boolean> {
+  const insforge = createInsforgeServerClient();
+  const { data } = await insforge.database
+    .from("staff_members")
+    .select("id, departments!inner(code)")
+    .eq("id", staffMemberId)
+    .eq("is_active", true)
+    .eq("departments.code", "RECEPCION")
+    .maybeSingle();
+
+  return Boolean(data?.id);
+}
+
+/**
+ * Capacidad recepción: admin OR manager OR staff_member activo en depto RECEPCION.
+ * Spec §Capacidad recepción — alineado a SQL can_manage_guest_stays().
+ */
+export async function canManageGuestStays(
+  session: StaffSession,
+  venueId?: string,
+): Promise<boolean> {
+  if (session.role === "admin") return true;
+
+  const targetVenueId = venueId ?? session.venueId;
+  if (!targetVenueId || session.venueId !== targetVenueId) return false;
+
+  if (session.role === "manager") return true;
+
+  if (session.role === "staff" && session.staffMemberId) {
+    return isReceptionStaffMember(session.staffMemberId);
+  }
+
+  return false;
+}
+
+export async function requireSupervisor(
+  request?: NextRequest,
+): Promise<StaffSession> {
+  const session = await requireStaff(request);
+  if (session.role !== "supervisor" && session.role !== "admin") {
+    throw new AuthError("FORBIDDEN", "Se requiere rol supervisor");
+  }
+  return session;
+}
+
+/** Panel incidencias: supervisor (depto asignado), manager o admin. */
+export async function requireSupervisorPanel(
+  request?: NextRequest,
+): Promise<StaffSession> {
+  const session = await requireStaff(request);
+  if (
+    session.role !== "supervisor" &&
+    session.role !== "manager" &&
+    session.role !== "admin"
+  ) {
+    throw new AuthError(
+      "FORBIDDEN",
+      "Se requiere rol supervisor, manager o admin",
+    );
+  }
+  return session;
+}
+
+export async function requireManager(
+  request?: NextRequest,
+): Promise<StaffSession> {
+  const session = await requireStaff(request);
+  if (session.role !== "manager" && session.role !== "admin") {
+    throw new AuthError("FORBIDDEN", "Se requiere rol manager");
+  }
+  return session;
+}
+
+/** Alias de canManageGuestStays; lanza 403 RECEPTION_REQUIRED si no autorizado. */
+export async function requireReception(
+  request?: NextRequest,
+  venueId?: string,
+): Promise<StaffSession> {
+  const session = await requireStaff(request);
+  const allowed = await canManageGuestStays(session, venueId);
+  if (!allowed) {
+    throw new AuthError(
+      "FORBIDDEN",
+      "RECEPTION_REQUIRED: capacidad recepción requerida",
+    );
+  }
+  return session;
+}
+
+/** staff_member_id vinculado al usuario autenticado (null si no hay vínculo). */
+export async function staffMemberIdForSession(
+  session: StaffSession,
+): Promise<string | null> {
+  if (session.staffMemberId) return session.staffMemberId;
+  if (!session.profileId) return null;
+
+  const insforge = createInsforgeServerClient();
+  const { data } = await insforge.database
+    .from("staff_members")
+    .select("id")
+    .eq("user_profile_id", session.profileId)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  return (data?.id as string) ?? null;
 }
