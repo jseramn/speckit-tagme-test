@@ -179,3 +179,113 @@ npx playwright test tests/e2e/staff-nfc-feedback.spec.ts
 - [data-model.md](./data-model.md) — tablas y vistas
 - [contracts/](./contracts/) — payloads API
 - [spec.md](./spec.md) — SC-001–SC-012
+
+---
+
+## Tests de Permisos y RLS (Opcional pero recomendado para piloto)
+
+Los tests de integración bajo `tests/contract/003-staff/rls/` validan que las políticas RLS de Fase 3 respeten la matriz de permisos (Q2=B): staff solo ve lo propio, supervisor solo su(s) departamento(s), manager/admin ven el venue completo.
+
+Por defecto, la suite completa aparece como **omitida** (`skipped`) en CI y en entornos locales sin credenciales de usuario. Estos tests no usan la service key (bypass RLS); necesitan clientes InsForge autenticados con JWT reales para simular cada rol en PostgREST.
+
+### Variables de entorno necesarias
+
+Además de las variables base del proyecto, configura en `.env.local`:
+
+| Variable | Obligatoria | Uso |
+|----------|-------------|-----|
+| `INSFORGE_URL` | Sí | Base URL del proyecto InsForge |
+| `INSFORGE_ANON_KEY` | Sí | Clave anon para clientes con JWT de rol |
+| `INSFORGE_SERVICE_KEY` | Sí* | Tests que comparan contra service role |
+| `INSFORGE_TEST_SUPERVISOR_JWT` | Recomendada | Cliente autenticado como supervisor |
+| `INSFORGE_TEST_MANAGER_JWT` | Recomendada | Cliente autenticado como manager |
+| `INSFORGE_TEST_ADMIN_JWT` | Opcional | Cliente autenticado como admin |
+| `INSFORGE_TEST_STAFF_JWT` | Opcional | Cliente autenticado como staff operativo |
+
+\* Sin service key, `hasRlsTestEnv()` puede activarse igualmente si al menos un JWT de rol está presente; algunos casos de comparación quedarán incompletos.
+
+Ejemplo en `.env.local`:
+
+```env
+INSFORGE_TEST_SUPERVISOR_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+INSFORGE_TEST_MANAGER_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+INSFORGE_TEST_ADMIN_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+# Opcional — staff operativo / recepción
+INSFORGE_TEST_STAFF_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+### Cómo obtener los JWTs
+
+**Prerrequisito:** usuarios piloto creados en InsForge Auth y vinculados a `user_profiles`:
+
+```bash
+npm run seed:staff        # estructura org + categorías incidencia
+npm run seed:pilot-users  # supervisor, manager y recepción piloto
+```
+
+Credenciales por defecto del seed (cambiables vía env):
+
+| Rol | Email | Contraseña default |
+|-----|-------|-------------------|
+| Supervisor | `supervisor.caribe@tagme.pilot` | `PilotCaribe2026!` |
+| Manager | `manager.caribe@tagme.pilot` | `PilotCaribe2026!` |
+| Staff (recepción) | `reception.caribe@tagme.pilot` | `PilotCaribe2026!` |
+
+**Opción A — Dashboard InsForge (recomendada)**
+
+1. Abre el proyecto **tagme-hotel-caribe** en [InsForge Dashboard](https://insforge.dev).
+2. Ve a **Authentication → Users**.
+3. Localiza el usuario piloto (p. ej. `supervisor.caribe@tagme.pilot`).
+4. Inicia sesión como ese usuario o copia su **access token** / JWT de sesión desde las herramientas de Auth del dashboard.
+5. Pega el token en la variable correspondiente (`INSFORGE_TEST_SUPERVISOR_JWT`, etc.).
+6. Repite para manager y admin.
+
+**Opción B — Sign-in vía API**
+
+Con la app en marcha (`npm run dev`), autentica cada usuario y extrae el `accessToken` de la respuesta:
+
+```bash
+curl -s -X POST http://localhost:3000/api/auth/sign-in \
+  -H "Content-Type: application/json" \
+  -d '{"email":"supervisor.caribe@tagme.pilot","password":"PilotCaribe2026!"}'
+```
+
+Copia el valor de `accessToken` del JSON de respuesta al `.env.local`. Los tokens expiran; renóvalos si los tests empiezan a fallar con `401`.
+
+### Tests que se activan
+
+Al configurar las variables, Vitest deja de omitir los `describe` RLS y ejecuta los casos cuyo JWT de rol esté disponible:
+
+| Archivo | Qué valida | Roles requeridos |
+|---------|------------|------------------|
+| `rls/permission-matrix.test.ts` | Regresión TR-02: matriz permisos staff/supervisor/manager | staff, supervisor, manager |
+| `rls/staff-role.test.ts` | Staff: feedback propio; sin acceso a incidencias | staff (+ supervisor para casos cruzados) |
+| `rls/supervisor-role.test.ts` | Supervisor: incidencias solo de depto asignado; sin feedback ajeno | supervisor (+ staff) |
+| `rls/capture-sessions.test.ts` | Sesiones NFC: deny-by-default; solo service role escribe | staff, supervisor, admin |
+
+Los tests de esquema/contrato en `scorecards.test.ts`, `scorecards-auth.test.ts` y `reception-auth.test.ts` corren sin JWT de rol (lógica de aplicación o validadores Zod).
+
+### Cómo ejecutar los tests de permisos
+
+```bash
+# Suite RLS completa
+npm run test -- tests/contract/003-staff/rls/
+
+# Archivo específico
+npm run test -- tests/contract/003-staff/rls/permission-matrix.test.ts
+
+# Con salida detallada
+npm run test -- tests/contract/003-staff/rls/ --reporter=verbose
+```
+
+**Esperado con JWTs configurados:** 0 suites `skipped` en `rls/`; tests individuales sin JWT de un rol concreto muestran `Skipping: set INSFORGE_TEST_*_JWT...` en consola pero no fallan la suite.
+
+### Recomendación pre-piloto Caribe
+
+Configura **al menos** `INSFORGE_TEST_SUPERVISOR_JWT` y `INSFORGE_TEST_MANAGER_JWT` antes de la semana piloto:
+
+- El **supervisor** es el rol más expuesto a errores de scope (incidencias y scorecards fuera de departamento asignado).
+- El **manager** valida visibilidad hotelera completa y acceso a comentarios textuales.
+- Un fallo RLS en piloto es difícil de detectar manualmente y puede exponer datos de otros departamentos o empleados.
+
+Ejecutar `npm run test -- tests/contract/003-staff/rls/` con JWTs válidos toma menos de un minuto y confirma que la capa de seguridad documentada en `005_staff_rls.sql` se comporta como la spec antes de abrir el hotel a usuarios reales.

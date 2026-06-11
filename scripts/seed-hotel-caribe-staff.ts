@@ -59,12 +59,55 @@ const JOB_ROLES: Record<string, string[]> = {
 
 const SHIFT_NAMES = ["Mañana 6–14", "Tarde 14–22", "Noche 22–6"];
 
-const INCIDENT_CATEGORIES = [
-  { code: "mantenimiento", label: "Mantenimiento", priority: "alta" as const },
-  { code: "limpieza", label: "Limpieza", priority: "media" as const },
-  { code: "ruido", label: "Ruido", priority: "media" as const },
-  { code: "f_and_b", label: "Alimentos y Bebidas", priority: "media" as const },
-  { code: "otro", label: "Otro", priority: "baja" as const },
+type DeptCode = (typeof DEPARTMENTS)[number]["code"];
+
+/**
+ * Ruteo automático de incidencias → supervisor del departamento asignado.
+ * Criterio: primer punto de resolución operativa en hotel piloto Caribe.
+ */
+const INCIDENT_CATEGORIES: {
+  code: string;
+  label: string;
+  priority: "alta" | "media" | "baja";
+  departmentCode: DeptCode;
+  routingNote: string;
+}[] = [
+  {
+    code: "mantenimiento",
+    label: "Mantenimiento",
+    priority: "alta",
+    departmentCode: "MANT",
+    routingNote: "Averías físicas (HVAC, plomería, electricidad)",
+  },
+  {
+    code: "limpieza",
+    label: "Limpieza",
+    priority: "media",
+    departmentCode: "HK",
+    routingNote: "Estado de habitación, amenities, limpieza de áreas",
+  },
+  {
+    code: "ruido",
+    label: "Ruido",
+    priority: "media",
+    departmentCode: "RECEPCION",
+    routingNote:
+      "Recepción triagea quejas de ruido y coordina con HK/Mantenimiento",
+  },
+  {
+    code: "f_and_b",
+    label: "Alimentos y Bebidas",
+    priority: "media",
+    departmentCode: "FB",
+    routingNote: "Restaurante, room service, bar",
+  },
+  {
+    code: "otro",
+    label: "Otro",
+    priority: "baja",
+    departmentCode: "RECEPCION",
+    routingNote: "Catch-all: Recepción clasifica y reasigna si aplica",
+  },
 ];
 
 const STAFF_PILOT = [
@@ -121,7 +164,7 @@ async function main(): Promise<void> {
   const deptMap = await upsertDepartments(db, venueId);
   const roleMap = await upsertJobRoles(db, deptMap);
   await upsertShifts(db, deptMap);
-  await upsertIncidentCategories(db, venueId, deptMap);
+  const categorySummary = await upsertIncidentCategories(db, venueId, deptMap);
   const memberMap = await upsertStaffMembers(db, venueId, deptMap, roleMap);
   await upsertStaffNfcTags(db, memberMap);
   await linkShiftAssignments(db, memberMap, deptMap);
@@ -131,6 +174,9 @@ async function main(): Promise<void> {
   console.log(`  Departments: ${Object.keys(deptMap).length}`);
   console.log(`  Staff members: ${Object.keys(memberMap).length}`);
   console.log(`  NFC slugs: /s/caribe-staff-*`);
+  console.log(
+    `  Categorías incidencia: ${categorySummary.withDept} con depto, ${categorySummary.withoutDept} sin depto`,
+  );
 }
 
 async function upsertVenueStaffSettings(
@@ -256,43 +302,76 @@ async function upsertShifts(
   console.log(`✓ shifts (created ${count} new)`);
 }
 
+interface CategorySeedSummary {
+  withDept: number;
+  withoutDept: number;
+  mappings: { code: string; departmentCode: DeptCode; departmentId: string }[];
+}
+
 async function upsertIncidentCategories(
   db: InsforgeDb,
   venueId: string,
   deptMap: DeptMap,
-): Promise<void> {
-  const defaultDept: Record<string, string | null> = {
-    mantenimiento: deptMap.MANT,
-    limpieza: deptMap.HK,
-    ruido: null,
-    f_and_b: deptMap.FB,
-    otro: null,
-  };
+): Promise<CategorySeedSummary> {
+  const mappings: CategorySeedSummary["mappings"] = [];
 
   for (let i = 0; i < INCIDENT_CATEGORIES.length; i++) {
     const cat = INCIDENT_CATEGORIES[i];
-    const { data: existing } = await db.database
-      .from("venue_incident_categories")
-      .select("id")
-      .eq("venue_id", venueId)
-      .eq("code", cat.code)
-      .maybeSingle();
+    const departmentId = deptMap[cat.departmentCode];
 
-    if (existing?.id) continue;
+    if (!departmentId) {
+      throw new Error(
+        `category ${cat.code}: department ${cat.departmentCode} not found`,
+      );
+    }
 
-    const { error } = await db.database.from("venue_incident_categories").insert([
-      {
-        venue_id: venueId,
-        code: cat.code,
-        label: cat.label,
-        default_priority: cat.priority,
-        default_department_id: defaultDept[cat.code] ?? null,
-        sort_order: i + 1,
-      },
-    ]);
+    const { error } = await db.database.from("venue_incident_categories").upsert(
+      [
+        {
+          venue_id: venueId,
+          code: cat.code,
+          label: cat.label,
+          default_priority: cat.priority,
+          default_department_id: departmentId,
+          sort_order: i + 1,
+          is_active: true,
+        },
+      ],
+      { onConflict: "venue_id,code" },
+    );
+
     if (error) throw new Error(`category ${cat.code}: ${error.message}`);
+
+    mappings.push({
+      code: cat.code,
+      departmentCode: cat.departmentCode,
+      departmentId,
+    });
   }
-  console.log(`✓ venue_incident_categories (${INCIDENT_CATEGORIES.length})`);
+
+  const { data: allCategories, error: queryError } = await db.database
+    .from("venue_incident_categories")
+    .select("code, default_department_id")
+    .eq("venue_id", venueId);
+
+  if (queryError) {
+    throw new Error(`category summary: ${queryError.message}`);
+  }
+
+  const rows = allCategories ?? [];
+  const withDept = rows.filter((row) => row.default_department_id).length;
+  const withoutDept = rows.length - withDept;
+
+  console.log(`✓ venue_incident_categories (${INCIDENT_CATEGORIES.length} upserted)`);
+  for (const cat of INCIDENT_CATEGORIES) {
+    const deptName =
+      DEPARTMENTS.find((d) => d.code === cat.departmentCode)?.name ??
+      cat.departmentCode;
+    console.log(`    ${cat.code} → ${deptName} (${cat.routingNote})`);
+  }
+  console.log(`  Resumen ruteo: ${withDept} con default_department_id, ${withoutDept} sin`);
+
+  return { withDept, withoutDept, mappings };
 }
 
 async function upsertStaffMembers(
