@@ -17,6 +17,7 @@
     "seed:staff": "tsx scripts/seed-hotel-caribe-staff.ts",
     "seed:scorecards": "tsx scripts/seed-scorecard-feedbacks.ts",
     "seed:pilot-users": "tsx scripts/seed-pilot-users.ts",
+    "seed:demo-incidents": "tsx scripts/seed-demo-incidents.ts",
     "audit:orphans": "tsx scripts/audit-traceability-orphans.ts",
     "db:migrate": "tsx scripts/apply-migrations.ts"
   },
