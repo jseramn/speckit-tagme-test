@@ -160,6 +160,23 @@ export function StayConsolidation({ venueId }: StayConsolidationProps) {
           <p className="mt-1 text-xs text-tagme-slate/70">
             Inicio: {new Date(lookup.startedAt).toLocaleString("es-CO")}
           </p>
+          {lookup.status === "expired" ? (
+            <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              Esta estadía efímera expiró. La consolidación puede fallar; use el
+              token más reciente del huésped si tiene varios walk-in.
+            </p>
+          ) : null}
+          {lookup.status === "consolidated" ? (
+            <p className="mt-3 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900">
+              Ya fue consolidada. Re-consolidar devolverá el mismo destino formal
+              (idempotente).
+            </p>
+          ) : null}
+          {lookup.stayType !== "ephemeral" ? (
+            <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              Solo se pueden consolidar estadías efímeras (walk-in).
+            </p>
+          ) : null}
         </div>
       ) : null}
 

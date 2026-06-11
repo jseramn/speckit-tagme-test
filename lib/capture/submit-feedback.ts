@@ -1,3 +1,4 @@
+import { resolveRoomTagForSubmit } from "@/lib/capture/resolve-room-tag-for-submit";
 import { validateSession } from "@/lib/staff/validate-session";
 import { resolveGuestStayForCapture } from "@/lib/stays/resolve-guest-stay-for-capture";
 import { CaptureError } from "@/lib/capture/errors";
@@ -24,11 +25,7 @@ export async function submitFeedback(
   input: SubmitFeedbackInput,
 ): Promise<SubmitFeedbackResult> {
   if (input.roomTagSlug) {
-    throw new CaptureError(
-      "NOT_IMPLEMENTED",
-      "Captura room NFC no disponible en M1",
-      501,
-    );
+    return submitRoomFeedback(input);
   }
 
   if (!input.sessionToken) {
@@ -95,6 +92,52 @@ export async function submitFeedback(
   if (sessionError) {
     throw new Error(
       sessionError.message ?? "Error al completar sesión",
+    );
+  }
+
+  return {
+    id: feedback.id as string,
+    createdAt: feedback.created_at as string,
+    message: "¡Gracias por tu opinión!",
+    stay,
+    stayCreated: created,
+  };
+}
+
+async function submitRoomFeedback(
+  input: SubmitFeedbackInput,
+): Promise<SubmitFeedbackResult> {
+  const roomTagSlug = input.roomTagSlug!;
+  const room = await resolveRoomTagForSubmit(roomTagSlug);
+
+  const { stay, created } = await resolveGuestStayForCapture(
+    room.venueId,
+    input.stayTokenFromCookie,
+  );
+
+  const insforge = createInsforgeServerClient();
+
+  const { data: feedback, error: feedbackError } = await insforge.database
+    .from("feedback_entries")
+    .insert([
+      {
+        venue_id: room.venueId,
+        guest_stay_id: stay.id,
+        staff_member_id: null,
+        staff_capture_session_id: null,
+        origin_type: "room_nfc",
+        origin_id: room.tagId,
+        rating: input.rating,
+        comment: input.comment ?? null,
+        context_snapshot: room.contextSnapshot,
+      },
+    ])
+    .select("id, created_at")
+    .single();
+
+  if (feedbackError || !feedback) {
+    throw new Error(
+      feedbackError?.message ?? "Error al guardar feedback",
     );
   }
 

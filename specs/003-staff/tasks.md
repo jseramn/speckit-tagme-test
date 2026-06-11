@@ -275,29 +275,29 @@ description: "Lista de tareas TagMe Fase 3 — Staff & Feedback Operativo (miles
 
 ### Consolidación estadías
 
-- [ ] T079 [Prioridad: Alta] [Milestone: M4] Implementar `consolidateStays()` en `lib/stays/consolidate-stays.ts`: transacción atómica UPDATE `guest_stay_id` en feedbacks/incidencias/sessions; efímera `status=consolidated`. [NUEVO] Depends on: T053, T036
+- [x] T079 [Prioridad: Alta] [Milestone: M4] Implementar `consolidateStays()` en `lib/stays/consolidate-stays.ts`: transacción atómica UPDATE `guest_stay_id` en feedbacks/incidencias/sessions; efímera `status=consolidated`. [NUEVO] Depends on: T053, T036
 
-- [ ] T080 [Prioridad: Alta] [Milestone: M4] Crear `POST /api/reception/stays/consolidate/route.ts`: auth `requireReception()` (= `canManageGuestStays`); variantes con/sin `formalStayId` preexistente (one-step). [S4] Depends on: T079, T055, T022
+- [x] T080 [Prioridad: Alta] [Milestone: M4] Crear `POST /api/reception/stays/consolidate/route.ts`: auth `requireReception()` (= `canManageGuestStays`); variantes con/sin `formalStayId` preexistente (one-step). [S4] Depends on: T079, T055, T022
 
-- [ ] T118 [Prioridad: Alta] [Milestone: M4] Test auth recepción en `tests/contract/003-staff/reception-auth.test.ts`: manager/admin PASS; staff en depto `RECEPCION` PASS; staff housekeeping 403; supervisor housekeeping 403; supervisor `RECEPCION` PASS en POST `/api/reception/stays` y `/consolidate`. [S4] Depends on: T055, T080, T024
+- [x] T118 [Prioridad: Alta] [Milestone: M4] Test auth recepción en `tests/contract/003-staff/reception-auth.test.ts`: manager/admin PASS; staff en depto `RECEPCION` PASS; staff housekeeping 403; supervisor housekeeping 403; supervisor `RECEPCION` PASS en POST `/api/reception/stays` y `/consolidate`. [S4] Depends on: T055, T080, T024
 
-- [ ] T081 [Prioridad: Alta] [Milestone: M4] Unit test `tests/unit/stay-consolidation.test.ts`: counts correctos, idempotencia (re-consolidar falla), `consolidated_into` FK. Depends on: T079
+- [x] T081 [Prioridad: Alta] [Milestone: M4] Unit test `tests/unit/stay-consolidation.test.ts`: counts correctos, idempotencia (re-consolidar falla), `consolidated_into` FK. Depends on: T079
 
-- [ ] T082 [Prioridad: Alta] [Milestone: M4] Crear `components/staff/StayConsolidation.tsx` + `app/(staff)/reception/consolidate/page.tsx`: lookup token → preview counts → consolidar. Depends on: T056, T080
+- [x] T082 [Prioridad: Alta] [Milestone: M4] Crear `components/staff/StayConsolidation.tsx` + `app/(staff)/reception/consolidate/page.tsx`: lookup token → preview counts → consolidar. Depends on: T056, T080
 
-- [ ] T083 [Prioridad: Alta] [Milestone: M4] Edge cases consolidación: efímera expirada (lookup warning), cookie stale post-consolidación retorna 409, múltiples efímeras mismo huésped (UI sugiere más reciente). Depends on: T082
+- [x] T083 [Prioridad: Alta] [Milestone: M4] Edge cases consolidación: efímera expirada (lookup warning), cookie stale post-consolidación retorna 409, múltiples efímeras mismo huésped (UI sugiere más reciente). Depends on: T082
 
 ### Room NFC captura
 
-- [ ] T084 [Prioridad: Alta] [Milestone: M4] Crear `app/(guest)/capture/room/[tagSlug]/page.tsx`: resolver `nfc_tags` F1, contexto habitación, bifurcación Feedback/Incidencia sin sesión staff. [G2] [REUTILIZA F1: `lib/tags/resolve-tag.ts`] Depends on: T043, T069
+- [x] T084 [Prioridad: Alta] [Milestone: M4] Crear `app/(guest)/capture/room/[tagSlug]/page.tsx`: resolver `nfc_tags` F1, contexto habitación, bifurcación Feedback/Incidencia sin sesión staff. [G2] [REUTILIZA F1: `lib/tags/resolve-tag.ts`] Depends on: T043, T069
 
-- [ ] T085 [Prioridad: Alta] [Milestone: M4] Extender `submitFeedback` y `submitIncident` para `origin_type=room_nfc` con `roomTagSlug`; `staff_member_id` NULL; `touch_events` `room_capture_open`. Depends on: T084
+- [x] T085 [Prioridad: Alta] [Milestone: M4] Extender `submitFeedback` y `submitIncident` para `origin_type=room_nfc` con `roomTagSlug`; `staff_member_id` NULL; `touch_events` `room_capture_open`. Depends on: T084
 
-- [ ] T086 [Prioridad: Alta] [Milestone: M4] Extender `app/(guest)/t/[tagSlug]/page.tsx` [REUTILIZA F1]: añadir CTAs "Dejar opinión" / "Reportar problema" → `/capture/room/{slug}` sin romper hub AVEX. Depends on: T084
+- [x] T086 [Prioridad: Alta] [Milestone: M4] Extender `app/(guest)/t/[tagSlug]/page.tsx` [REUTILIZA F1]: añadir CTAs "Dejar opinión" / "Reportar problema" → `/capture/room/{slug}` sin romper hub AVEX. Depends on: T084
 
-- [ ] T087 [Prioridad: Alta] [Milestone: M4] Test trazabilidad room: `origin_type=room_nfc`, `staff_member_id IS NULL`, `room_number` en snapshot; mismo workflow incidencia que staff-led. Depends on: T085
+- [x] T087 [Prioridad: Alta] [Milestone: M4] Test trazabilidad room: `origin_type=room_nfc`, `staff_member_id IS NULL`, `room_number` en snapshot; mismo workflow incidencia que staff-led. Depends on: T085
 
-- [ ] T088 [Prioridad: Media] [Milestone: M4] Validar quickstart esc. 4 y 6; verificar TR-05 (slugs `/s/` vs `/t/` sin colisión). Depends on: T083, T087
+- [x] T088 [Prioridad: Media] [Milestone: M4] Validar quickstart esc. 4 y 6; verificar TR-05 (slugs `/s/` vs `/t/` sin colisión). Depends on: T083, T087
 
 **Checkpoint M4**: Dos orígenes trazables (staff_nfc + room_nfc) · Consolidación operativa
 

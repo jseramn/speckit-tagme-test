@@ -1,4 +1,5 @@
 import { CaptureError } from "@/lib/capture/errors";
+import { resolveRoomTagForSubmit } from "@/lib/capture/resolve-room-tag-for-submit";
 import { routeIncidentByCategory } from "@/lib/supervisor/incident-routing";
 import { validateSession } from "@/lib/staff/validate-session";
 import { resolveGuestStayForCapture } from "@/lib/stays/resolve-guest-stay-for-capture";
@@ -54,11 +55,7 @@ export async function submitIncident(
   input: SubmitIncidentInput,
 ): Promise<SubmitIncidentResult> {
   if (input.roomTagSlug) {
-    throw new CaptureError(
-      "NOT_IMPLEMENTED",
-      "Captura room NFC no disponible en M3",
-      501,
-    );
+    return submitRoomIncident(input);
   }
 
   if (!input.sessionToken) {
@@ -157,6 +154,90 @@ export async function submitIncident(
   if (sessionError) {
     throw new Error(
       sessionError.message ?? "Error al completar sesión",
+    );
+  }
+
+  return {
+    id: incident.id as string,
+    status: "abierta",
+    category: incident.category as string,
+    priority: incident.priority as string,
+    createdAt: incident.created_at as string,
+    stay,
+    stayCreated: created,
+  };
+}
+
+async function submitRoomIncident(
+  input: SubmitIncidentInput,
+): Promise<SubmitIncidentResult> {
+  const roomTagSlug = input.roomTagSlug!;
+  const room = await resolveRoomTagForSubmit(roomTagSlug);
+
+  const routing = await routeIncidentByCategory(
+    room.venueId,
+    input.category,
+    input.priority,
+  );
+
+  if (!routing) {
+    throw new CaptureError(
+      "INVALID_SESSION",
+      "Categoría de incidencia no válida",
+      422,
+    );
+  }
+
+  const { stay, created } = await resolveGuestStayForCapture(
+    room.venueId,
+    input.stayTokenFromCookie,
+  );
+
+  const insforge = createInsforgeServerClient();
+  const historyActorId = await resolveCaptureHistoryActor(room.venueId);
+
+  const { data: incident, error: incidentError } = await insforge.database
+    .from("incident_reports")
+    .insert([
+      {
+        venue_id: room.venueId,
+        guest_stay_id: stay.id,
+        staff_member_id: null,
+        staff_capture_session_id: null,
+        department_id: routing.departmentId,
+        origin_type: "room_nfc",
+        origin_id: room.tagId,
+        category: routing.category.code,
+        priority: routing.priority,
+        status: "abierta",
+        description: input.description,
+        context_snapshot: room.contextSnapshot,
+      },
+    ])
+    .select("id, status, category, priority, created_at")
+    .single();
+
+  if (incidentError || !incident) {
+    throw new Error(
+      incidentError?.message ?? "Error al guardar incidencia",
+    );
+  }
+
+  const { error: historyError } = await insforge.database
+    .from("incident_status_history")
+    .insert([
+      {
+        incident_id: incident.id,
+        changed_by: historyActorId,
+        from_status: null,
+        to_status: "abierta",
+        note: "Registro inicial por huésped vía captura room NFC",
+      },
+    ]);
+
+  if (historyError) {
+    throw new Error(
+      historyError.message ?? "Error al registrar historial de incidencia",
     );
   }
 

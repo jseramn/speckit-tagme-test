@@ -34,6 +34,15 @@ export interface ListIncidentsResult {
   total: number;
 }
 
+function roomNumberFromSnapshot(
+  snapshot: ContextSnapshot | Record<string, unknown>,
+): string | null {
+  const value =
+    (snapshot as Record<string, unknown>).room_number ??
+    (snapshot as Record<string, unknown>).roomNumber;
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
 function originLabelFromSnapshot(
   originType: CaptureOriginType,
   snapshot: ContextSnapshot | Record<string, unknown>,
@@ -46,7 +55,16 @@ function originLabelFromSnapshot(
       ? `NFC Staff — ${name}`
       : "NFC Staff";
   }
-  return "NFC Habitación";
+
+  const roomNumber = roomNumberFromSnapshot(snapshot);
+  if (roomNumber) {
+    return `NFC Habitación — ${roomNumber}`;
+  }
+
+  const zone = (snapshot as Record<string, unknown>).zone;
+  return typeof zone === "string" && zone
+    ? `NFC Zona — ${zone}`
+    : "NFC Habitación";
 }
 
 export async function listIncidents(
@@ -134,7 +152,12 @@ export async function listIncidents(
         row.origin_type as CaptureOriginType,
         row.context_snapshot as ContextSnapshot,
       ),
-      roomNumber: null,
+      roomNumber:
+        row.origin_type === "room_nfc"
+          ? roomNumberFromSnapshot(
+              row.context_snapshot as ContextSnapshot | Record<string, unknown>,
+            )
+          : null,
       departmentName,
       createdAt: row.created_at as string,
       assignedTo: (row.assigned_to as string | null) ?? null,

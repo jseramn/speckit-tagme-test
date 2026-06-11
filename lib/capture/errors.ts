@@ -2,6 +2,7 @@ export type CaptureErrorCode =
   | "SESSION_EXPIRED"
   | "INVALID_SESSION"
   | "INVALID_STAFF_TAG"
+  | "INVALID_ROOM_TAG"
   | "NOT_IMPLEMENTED";
 
 export class CaptureError extends Error {

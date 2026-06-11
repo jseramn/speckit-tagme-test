@@ -21,7 +21,8 @@ const PRIORITY_LABELS: Record<IncidentPriority, string> = {
 const PRIORITIES: IncidentPriority[] = ["baja", "media", "alta", "urgente"];
 
 export interface IncidentFormProps {
-  sessionToken: string;
+  sessionToken?: string;
+  roomTagSlug?: string;
   categories: IncidentCategoryOption[];
   disabled?: boolean;
   onSuccess: (message: string) => void;
@@ -30,6 +31,7 @@ export interface IncidentFormProps {
 
 export function IncidentForm({
   sessionToken,
+  roomTagSlug,
   categories,
   disabled = false,
   onSuccess,
@@ -70,7 +72,7 @@ export function IncidentForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sessionToken,
+          ...(roomTagSlug ? { roomTagSlug } : { sessionToken }),
           category,
           description: description.trim(),
           priority: effectivePriority,

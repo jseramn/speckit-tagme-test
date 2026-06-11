@@ -13,7 +13,8 @@ const RATING_LABELS: Record<number, string> = {
 };
 
 export interface FeedbackFormProps {
-  sessionToken: string;
+  sessionToken?: string;
+  roomTagSlug?: string;
   disabled?: boolean;
   onSuccess: (message: string) => void;
   onBack: () => void;
@@ -21,6 +22,7 @@ export interface FeedbackFormProps {
 
 export function FeedbackForm({
   sessionToken,
+  roomTagSlug,
   disabled = false,
   onSuccess,
   onBack,
@@ -48,7 +50,7 @@ export function FeedbackForm({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          sessionToken,
+          ...(roomTagSlug ? { roomTagSlug } : { sessionToken }),
           rating,
           comment: comment.trim() ? comment.trim() : null,
         }),
