@@ -185,12 +185,9 @@ export function ScorecardDrillDown({
                   className="flex items-center justify-between rounded-xl bg-tagme-cream/40 px-4 py-3 text-sm"
                 >
                   <span className="font-medium text-tagme-ink">
-                    {shift.shiftName}
-                    {shift.shiftId === "unassigned" ? (
-                      <span className="ml-2 text-xs text-tagme-gold">
-                        (TR-07)
-                      </span>
-                    ) : null}
+                    {shift.shiftId === "unassigned"
+                      ? "Sin turno asignado"
+                      : shift.shiftName}
                   </span>
                   <span className="text-tagme-slate">
                     {shift.feedbackCount} op. ·{" "}
