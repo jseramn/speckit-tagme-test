@@ -359,39 +359,39 @@ description: "Lista de tareas TagMe Fase 3 — Staff & Feedback Operativo (miles
 
 ### API configuración organizacional
 
-- [ ] T102 [Prioridad: Alta] [Milestone: M6] Crear CRUD `app/api/supervisor/departments/route.ts` y `[id]/route.ts` con scope supervisor/manager. [V3] Depends on: T072, T022
+- [x] T102 [Prioridad: Alta] [Milestone: M6] Crear CRUD `app/api/supervisor/departments/route.ts` y `[id]/route.ts` con scope supervisor/manager. [V3] Depends on: T072, T022
 
-- [ ] T103 [Prioridad: Alta] [Milestone: M6] Crear CRUD `app/api/supervisor/shifts/route.ts` por `departmentId` con validación `days_of_week`. [V3] Depends on: T102
+- [x] T103 [Prioridad: Alta] [Milestone: M6] Crear CRUD `app/api/supervisor/shifts/route.ts` por `departmentId` con validación `days_of_week`. [V3] Depends on: T102
 
-- [ ] T115 [Prioridad: Alta] [Milestone: M6] Crear CRUD `app/api/supervisor/job-roles/route.ts` y `[id]/route.ts`: list/create/update/desactivar cargos por `departmentId`; scope supervisor (depto asignado) / manager (venue). Body: `{ departmentId, title, isActive }`. [V3] [FR-028] Depends on: T102, T072
+- [x] T115 [Prioridad: Alta] [Milestone: M6] Crear CRUD `app/api/supervisor/job-roles/route.ts` y `[id]/route.ts`: list/create/update/desactivar cargos por `departmentId`; scope supervisor (depto asignado) / manager (venue). Body: `{ departmentId, title, isActive }`. [V3] [FR-028] Depends on: T102, T072
 
-- [ ] T116 [Prioridad: Alta] [Milestone: M6] Contract test `tests/contract/003-staff/supervisor-job-roles.test.ts`: supervisor crea cargo en depto asignado (201), supervisor 403 en depto ajeno, manager CRUD venue. Depends on: T115, T003
+- [x] T116 [Prioridad: Alta] [Milestone: M6] Contract test `tests/contract/003-staff/supervisor-job-roles.test.ts`: supervisor crea cargo en depto asignado (201), supervisor 403 en depto ajeno, manager CRUD venue. Depends on: T115, T003
 
-- [ ] T104 [Prioridad: Alta] [Milestone: M6] Crear CRUD `app/api/supervisor/staff-members/route.ts`: asignación depto/`jobRoleId` válido vía T115, activar/desactivar. **[DECISIÓN NEGOCIO]** no hardcodear empleados Caribe. Depends on: T102, T115
+- [x] T104 [Prioridad: Alta] [Milestone: M6] Crear CRUD `app/api/supervisor/staff-members/route.ts`: asignación depto/`jobRoleId` válido vía T115, activar/desactivar. **[DECISIÓN NEGOCIO]** no hardcodear empleados Caribe. Depends on: T102, T115
 
-- [ ] T105 [Prioridad: Alta] [Milestone: M6] Crear endpoints asignación NFC y turnos: `StaffNfcAssignForm` logic en API (revocar tag anterior al asignar nuevo); CRUD `staff_shift_assignments`. Depends on: T104
+- [x] T105 [Prioridad: Alta] [Milestone: M6] Crear endpoints asignación NFC y turnos: `StaffNfcAssignForm` logic en API (revocar tag anterior al asignar nuevo); CRUD `staff_shift_assignments`. Depends on: T104
 
 ### UI configuración
 
-- [ ] T106 [Prioridad: Alta] [Milestone: M6] Crear `components/supervisor/StaffNfcAssignForm.tsx`, `OrganizationTree.tsx` y páginas `app/(supervisor)/organization/departments|shifts|job-roles|staff/page.tsx`. [V3] Depends on: T102, T103, T104, T105, T115
+- [x] T106 [Prioridad: Alta] [Milestone: M6] Crear `components/supervisor/StaffNfcAssignForm.tsx`, `OrganizationTree.tsx` y páginas `app/(supervisor)/organization/departments|shifts|job-roles|staff/page.tsx`. [V3] Depends on: T102, T103, T104, T105, T115
 
-- [ ] T107 [Prioridad: Media] [Milestone: M6] Crear `app/(supervisor)/organization/page.tsx` hub navegación config; proteger rutas con layout supervisor. Depends on: T106
+- [x] T107 [Prioridad: Media] [Milestone: M6] Crear `app/(supervisor)/organization/page.tsx` hub navegación config; proteger rutas con layout supervisor. Depends on: T106
 
 ### Piloto y hardening
 
-- [ ] T108 [Prioridad: Alta] [Milestone: M6] Ejecutar validación completa `quickstart.md` (10 escenarios) documentando PASS/FAIL por SC-00x. Depends on: T107, T101, T088
+- [x] T108 [Prioridad: Alta] [Milestone: M6] Ejecutar validación completa `quickstart.md` (10 escenarios) documentando PASS/FAIL por SC-00x. Depends on: T107, T101, T088
 
-- [ ] T109 [Prioridad: Alta] [Milestone: M6] Test Safari iOS NFC real (TR-08): apertura `/s/{slug}` ≤3s en dispositivo físico; documentar hallazgos. Depends on: T049
+- [x] T109 [Prioridad: Alta] [Milestone: M6] Test Safari iOS NFC real (TR-08): apertura `/s/{slug}` ≤3s en dispositivo físico; documentar hallazgos. Depends on: T049
 
-- [ ] T110 [Prioridad: Alta] [Milestone: M6] Auditoría seguridad TR-09: verificar CHECK constraints origen en DB + validación Zod en APIs; script query registros huérfanos (debe retornar 0 filas). Depends on: T047
+- [x] T110 [Prioridad: Alta] [Milestone: M6] Auditoría seguridad TR-09: verificar CHECK constraints origen en DB + validación Zod en APIs; script query registros huérfanos (debe retornar 0 filas). Depends on: T047
 
-- [ ] T111 [Prioridad: Media] [Milestone: M6] Moderación comentarios: endpoint supervisor `GET /api/supervisor/feedback-comments` con filtro depto + filtro palabras básico. **[DECISIÓN NEGOCIO]** lista palabras. Depends on: T093
+- [x] T111 [Prioridad: Media] [Milestone: M6] Moderación comentarios: endpoint supervisor `GET /api/supervisor/feedback-comments` con filtro depto + filtro palabras básico. **[DECISIÓN NEGOCIO]** lista palabras. Depends on: T093
 
-- [ ] T112 [Prioridad: Media] [Milestone: M6] Performance smoke TR-03: scorecard departamento ≤3s con 200 empleados simulados; documentar si requiere cache diario. Depends on: T097
+- [x] T112 [Prioridad: Media] [Milestone: M6] Performance smoke TR-03: scorecard departamento ≤3s con 200 empleados simulados; documentar si requiere cache diario. Depends on: T097
 
-- [ ] T113 [Prioridad: Alta] [Milestone: M6] Preparar capacitación piso Caribe: guía 1-página staff NFC + recepción consolidación (entregable operativo, no código). **[DECISIÓN NEGOCIO]** Depends on: T108
+- [x] T113 [Prioridad: Alta] [Milestone: M6] Preparar capacitación piso Caribe: guía 1-página staff NFC + recepción consolidación (entregable operativo, no código). **[DECISIÓN NEGOCIO]** Depends on: T108
 
-- [ ] T114 [Prioridad: Alta] [Milestone: M6] Semana piloto: checklist diario SC-005, SC-011, SC-012 con métricas captura vs. interacciones. **[DECISIÓN NEGOCIO]** Depends on: T113
+- [x] T114 [Prioridad: Alta] [Milestone: M6] Semana piloto: checklist diario SC-005, SC-011, SC-012 con métricas captura vs. interacciones. **[DECISIÓN NEGOCIO]** Depends on: T113
 
 **Checkpoint M6**: Fase 3 done según Constitution §8 — piloto operativo una semana
 

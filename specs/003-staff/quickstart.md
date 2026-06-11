@@ -168,9 +168,24 @@ npx @insforge/cli db push
 # Tests unitarios scorecard/sesión
 npm run test -- tests/unit/scorecards-nps.test.ts
 
+# Contract test job_roles (M6 / T115)
+npm run test -- tests/contract/003-staff/supervisor-job-roles.test.ts
+
+# Auditoría TR-09 — registros huérfanos (debe PASS)
+npm run audit:orphans
+
 # E2E flujo staff NFC
 npx playwright test tests/e2e/staff-nfc-feedback.spec.ts
 ```
+
+## Validación M6 completada
+
+Ver [checklists/quickstart-validation.md](./checklists/quickstart-validation.md) para resultados PASS por escenario.
+
+Guías operativas:
+- [guides/capacitacion-piso-caribe.md](./guides/capacitacion-piso-caribe.md) — capacitación staff/recepción/supervisor
+- [checklists/pilot-week.md](./checklists/pilot-week.md) — métricas diarias semana piloto
+- [checklists/ios-nfc-tr08.md](./checklists/ios-nfc-tr08.md) — protocolo iOS Safari NFC
 
 ---
 

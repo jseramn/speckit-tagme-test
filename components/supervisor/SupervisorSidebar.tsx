@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/pulse", label: "Pulso" },
   { href: "/scorecards", label: "Scorecards" },
   { href: "/incidents", label: "Incidencias" },
+  { href: "/organization", label: "Organización" },
 ];
 
 interface SupervisorSidebarProps {
