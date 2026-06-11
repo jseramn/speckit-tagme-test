@@ -2,10 +2,10 @@
 # TagMe — Contexto para agentes
 
 **Proyecto**: TagMe NFC/IoT Guest Experience Platform  
-**Feature activa**: `specs/003-staff` (Fase 3 — Staff & Feedback Operativo)  
-**Plan**: [specs/003-staff/plan.md](../specs/003-staff/plan.md)  
-**Spec**: [specs/003-staff/spec.md](../specs/003-staff/spec.md)  
-**Constitution Fase 3**: [specs/003-staff/constitution.md](../specs/003-staff/constitution.md)
+**Feature activa**: `specs/demo-hotel-prep` (Preparación Demo Hotel Caribe)  
+**Plan**: [specs/demo-hotel-prep/plan.md](../specs/demo-hotel-prep/plan.md)  
+**Spec**: [specs/demo-hotel-prep/spec.md](../specs/demo-hotel-prep/spec.md)  
+**Fase 3 base**: [specs/003-staff/spec.md](../specs/003-staff/spec.md) | [constitution](../specs/003-staff/constitution.md)
 
 ## Stack
 
