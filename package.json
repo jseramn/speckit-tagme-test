@@ -18,6 +18,7 @@
     "seed:scorecards": "tsx scripts/seed-scorecard-feedbacks.ts",
     "seed:pilot-users": "tsx scripts/seed-pilot-users.ts",
     "seed:demo-incidents": "tsx scripts/seed-demo-incidents.ts",
+    "seed:demo": "tsx scripts/seed-demo-all.ts",
     "audit:orphans": "tsx scripts/audit-traceability-orphans.ts",
     "db:migrate": "tsx scripts/apply-migrations.ts"
   },
