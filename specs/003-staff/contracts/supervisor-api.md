@@ -134,7 +134,7 @@ Asignar o reemplazar tarjeta.
 
 ```json
 {
-  "tagSlug": "caribe-staff-carlos-r"
+  "tagSlug": "caribe-staff-carlos-p"
 }
 ```
 

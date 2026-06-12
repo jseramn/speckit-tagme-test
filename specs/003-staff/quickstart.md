@@ -55,7 +55,7 @@ Guía para validar la Fase 3 end-to-end tras implementación. Referencia contrat
 **Objetivo**: Captura sin cookie previa auto-crea estadía.
 
 1. Ventana incógnito (sin cookie)
-2. Abrir `/s/caribe-staff-carlos-r` → enviar feedback
+2. Abrir `/s/caribe-staff-carlos-p` → enviar feedback
 3. **Esperado**: `guest_stays.stay_type=ephemeral`, TTL ~48h
 4. Verificar cookie emitida automáticamente
 

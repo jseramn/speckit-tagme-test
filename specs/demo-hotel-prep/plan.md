@@ -68,7 +68,7 @@ Dejar TagMe en estado **demo-ready** para Hotel Caribe ejecutando solo trabajo d
 | **Bandeja sin incidencias precargadas** | Alto — anticlimax al abrir `/incidents` | Bajo | Nuevo `scripts/seed-demo-incidents.ts` (2–3 casos realistas) |
 | **Etiqueta `(TR-07)` visible** en scorecards turno | Alto — luce desarrollo interno | Muy bajo | Reemplazar por "Sin turno asignado" en `ScorecardDrillDown.tsx` |
 | **Sin comando único de preparación** | Medio — riesgo de olvidar un seed | Bajo | Agregar `npm run seed:demo` en `package.json` |
-| **Slug inconsistente en spec** (`carlos-r` vs `carlos-p`) | Bajo — confusión facilitador | Muy bajo | Documentar slugs canónicos en guion (ver §2) |
+| ~~**Slug inconsistente en spec**~~ | — | — | Resuelto en T008; slugs canónicos en §2.4 |
 | **E2E incidencias ausente** | Medio — confianza interna pre-ensayo | Bajo | Smoke manual documentado en `quickstart.md` (no obligatorio E2E nuevo) |
 | **Supervisor piloto solo HK** | Medio — incidencia Mantenimiento no visible para supervisor HK | Bajo | Guion: incidencia demo vía `maria-g` (HK) o login `manager` para bandeja global |
 | **Estados de carga texto plano** ("Cargando…") | Bajo | — | Aceptable para demo; no invertir en skeletons |
@@ -150,8 +150,6 @@ npm run seed:demo
 **Regla**: no truncar tablas completas; borrar solo por `seed_tag` o ventana temporal.
 
 ### 2.4 Actores y URLs canónicos para la demo
-
-> **Corrección**: el slug real en seed es `caribe-staff-carlos-p` (no `carlos-r`).
 
 | Rol demo | Slug / URL | Departamento | Uso en guion |
 |----------|------------|--------------|--------------|

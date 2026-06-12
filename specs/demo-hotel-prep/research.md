@@ -34,7 +34,7 @@ Decisiones consolidadas para la fase de preparación demo. Sin NEEDS CLARIFICATI
 
 **Decision**: María G. (`caribe-staff-maria-g`) como protagonista única del guion en vivo; Carlos P. (`caribe-staff-carlos-p`) reservado para E2E/backup.
 
-**Rationale**: E2E paralelo usa slugs distintos (`maria-g` vs `carlos-p`) para evitar `SESSION_EXPIRED`. La spec mencionaba `carlos-r` que no existe en seed.
+**Rationale**: E2E paralelo usa slugs distintos (`maria-g` vs `carlos-p`) para evitar `SESSION_EXPIRED`. Ambos slugs existen en seed y están alineados en la documentación de demo.
 
 **Alternatives considered**:
 - Roberto H. (Mantenimiento) como protagonista — rechazado: supervisor piloto solo tiene dept HK asignado; requeriría manager para bandeja.

@@ -142,7 +142,7 @@ Como **mesero o camarista del Hotel Caribe**, quiero **acercar mi tarjeta NFC al
 2. **Dado** la sesión activa, **Cuando** el huésped envía feedback con calificación 1–5, **Entonces** ve confirmación clara y la sesión queda cerrada.
 3. **Dado** el feedback enviado, **Cuando** el supervisor consulta scorecards, **Entonces** el nuevo registro impacta la métrica del empleado en ≤60 segundos.
 
-**Empleados demo sugeridos**: `caribe-staff-maria-g` (Housekeeping), `caribe-staff-carlos-r` (F&B) — slugs del seed Hotel Caribe.
+**Empleados demo sugeridos**: `caribe-staff-maria-g` (Housekeeping), `caribe-staff-carlos-p` (Housekeeping) — slugs del seed Hotel Caribe.
 
 ---
 

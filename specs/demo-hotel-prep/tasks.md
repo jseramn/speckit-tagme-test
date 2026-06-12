@@ -54,7 +54,7 @@ description: "Lista de tareas — Preparación Demo Hotel Caribe (sin nuevas fun
 
 ### Corrección slug canónico (documentación)
 
-- [ ] T008 [Prioridad: P0] Corregir slug `caribe-staff-carlos-r` → `caribe-staff-carlos-p` (Housekeeping, no F&B) en `specs/demo-hotel-prep/spec.md` y alinear cualquier referencia en `specs/demo-hotel-prep/research.md` / `data-model.md` si contradice el seed en `scripts/seed-hotel-caribe-staff.ts`
+- [x] T008 [Prioridad: P0] Corregir slug canónico `caribe-staff-carlos-p` (Housekeeping) en `specs/demo-hotel-prep/spec.md` y alinear referencias en `specs/demo-hotel-prep/research.md` / `data-model.md` / guías relacionadas con el seed en `scripts/seed-hotel-caribe-staff.ts`
 
 **Checkpoint P0**: `npm run seed:demo` termina sin error; `/incidents` muestra ≥2 incidencias; scorecards sin `(TR-07)`.
 
