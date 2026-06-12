@@ -8,6 +8,11 @@ import {
   hasInsforgeIntegrationEnv,
   loadTestEnv,
 } from "./helpers/load-env";
+import {
+  INTEGRATION_TIMEOUT,
+  STAFF_SLUG,
+  openTestSession,
+} from "../../helpers/integration";
 
 loadTestEnv();
 
@@ -42,9 +47,6 @@ describe.skipIf(!hasInsforge)("supervisor incidents integration (T065, T074)", (
   it(
     "manager can list and advance incident through full workflow",
     async () => {
-      const { openCaptureSession } = await import(
-        "@/lib/staff/open-capture-session"
-      );
       const { submitIncident } = await import("@/lib/capture/submit-incident");
       const { listIncidents } = await import(
         "@/lib/supervisor/list-incidents"
@@ -56,14 +58,13 @@ describe.skipIf(!hasInsforge)("supervisor incidents integration (T065, T074)", (
         "@/lib/insforge-server"
       );
 
-      const opened = await openCaptureSession({
-        staffTagSlug: "caribe-staff-roberto-h",
-        clientFingerprint: `test-${Date.now()}-supervisor-flow`,
+      const opened = await openTestSession({
+        slug: STAFF_SLUG.maintenance,
+        label: "supervisor-flow",
       });
-      expect(opened).not.toBeNull();
 
       const created = await submitIncident({
-        sessionToken: opened!.sessionToken,
+        sessionToken: opened.sessionToken,
         category: "mantenimiento",
         description: "Fuga de agua en baño",
         stayTokenFromCookie: null,
@@ -114,6 +115,6 @@ describe.skipIf(!hasInsforge)("supervisor incidents integration (T065, T074)", (
 
       expect(history?.length).toBeGreaterThanOrEqual(4);
     },
-    30_000,
+    INTEGRATION_TIMEOUT.supervisorFlow,
   );
 });

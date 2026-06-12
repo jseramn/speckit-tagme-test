@@ -5,6 +5,11 @@ import {
   hasInsforgeIntegrationEnv,
   loadTestEnv,
 } from "./helpers/load-env";
+import {
+  INTEGRATION_TIMEOUT,
+  STAFF_SLUG,
+  openTestSession,
+} from "../../helpers/integration";
 
 loadTestEnv();
 
@@ -47,9 +52,6 @@ describe.skipIf(!hasInsforge)("guest capture incident integration (T064, T068)",
   it(
     "submits incident on active session with history and department routing",
     async () => {
-      const { openCaptureSession } = await import(
-        "@/lib/staff/open-capture-session"
-      );
       const { submitIncident } = await import("@/lib/capture/submit-incident");
       const { validateSession } = await import(
         "@/lib/staff/validate-session"
@@ -58,15 +60,10 @@ describe.skipIf(!hasInsforge)("guest capture incident integration (T064, T068)",
         "@/lib/insforge-server"
       );
 
-      const fingerprint = `test-${Date.now()}-incident`;
-      const opened = await openCaptureSession({
-        staffTagSlug: "caribe-staff-maria-g",
-        clientFingerprint: fingerprint,
-      });
-      expect(opened).not.toBeNull();
+      const opened = await openTestSession({ label: "incident-submit" });
 
       const result = await submitIncident({
-        sessionToken: opened!.sessionToken,
+        sessionToken: opened.sessionToken,
         category: "mantenimiento",
         description: "El aire acondicionado no enfría",
         stayTokenFromCookie: null,
@@ -78,7 +75,7 @@ describe.skipIf(!hasInsforge)("guest capture incident integration (T064, T068)",
       expect(result.priority).toBeTruthy();
       expect(result.stay.id).toBeTruthy();
 
-      const after = await validateSession(opened!.sessionToken);
+      const after = await validateSession(opened.sessionToken);
       expect(after.status).toBe("expired");
 
       const insforge = createInsforgeServerClient();
@@ -108,7 +105,7 @@ describe.skipIf(!hasInsforge)("guest capture incident integration (T064, T068)",
       const { data: sessionRow } = await insforge.database
         .from("staff_capture_sessions")
         .select("id")
-        .eq("session_token", opened!.sessionToken)
+        .eq("session_token", opened.sessionToken)
         .maybeSingle();
 
       const { data: feedbackOverlap } = await insforge.database
@@ -119,7 +116,7 @@ describe.skipIf(!hasInsforge)("guest capture incident integration (T064, T068)",
 
       expect(feedbackOverlap?.length ?? 0).toBe(0);
     },
-    20_000,
+    INTEGRATION_TIMEOUT.captureFlow,
   );
 
   it("returns SESSION_EXPIRED (410) for expired session", async () => {
@@ -133,7 +130,7 @@ describe.skipIf(!hasInsforge)("guest capture incident integration (T064, T068)",
     const { data: tag } = await insforge.database
       .from("staff_nfc_tags")
       .select("id, staff_member_id, staff_members!inner(venue_id)")
-      .eq("tag_slug", "caribe-staff-maria-g")
+      .eq("tag_slug", STAFF_SLUG.primary)
       .eq("is_active", true)
       .maybeSingle();
 

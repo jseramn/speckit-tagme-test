@@ -10,6 +10,12 @@ import {
   hasInsforgeIntegrationEnv,
   loadTestEnv,
 } from "./helpers/load-env";
+import {
+  INTEGRATION_TIMEOUT,
+  STAFF_SLUG,
+  getPilotVenueId,
+  openTestSession,
+} from "../../helpers/integration";
 
 loadTestEnv();
 
@@ -66,20 +72,7 @@ describe("guest stay contract validators (T051)", () => {
   });
 });
 
-describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () => {
-  async function getPilotVenueId() {
-    const { createInsforgeServerClient } = await import(
-      "@/lib/insforge-server"
-    );
-    const insforge = createInsforgeServerClient();
-    const { data } = await insforge.database
-      .from("venues")
-      .select("id")
-      .eq("slug", "hotel-caribe")
-      .maybeSingle();
-    return data?.id as string;
-  }
-
+describe.sequential.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () => {
   it(
     "creates formal stay, reuses cookie, closes stay, and requires new stay after close",
     async () => {
@@ -97,7 +90,6 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
       );
 
       const venueId = await getPilotVenueId();
-      expect(venueId).toBeTruthy();
 
       const formal = await createFormalStay({
         venueId,
@@ -128,15 +120,12 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
       expect(newEphemeral.created).toBe(true);
       expect(newEphemeral.stay.stay_type).toBe("ephemeral");
     },
-    20_000,
+    INTEGRATION_TIMEOUT.stayFlow,
   );
 
   it(
     "consolidates ephemeral into formal with traceability (idempotent)",
     async () => {
-      const { openCaptureSession } = await import(
-        "@/lib/staff/open-capture-session"
-      );
       const { submitFeedback } = await import("@/lib/capture/submit-feedback");
       const { consolidateStays } = await import(
         "@/lib/stays/consolidate-stays"
@@ -146,16 +135,10 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
       );
 
       const venueId = await getPilotVenueId();
-      const fingerprint = `test-${Date.now()}-consolidate`;
-
-      const opened = await openCaptureSession({
-        staffTagSlug: "caribe-staff-maria-g",
-        clientFingerprint: fingerprint,
-      });
-      expect(opened).not.toBeNull();
+      const opened = await openTestSession({ label: "consolidate" });
 
       const feedback = await submitFeedback({
-        sessionToken: opened!.sessionToken,
+        sessionToken: opened.sessionToken,
         rating: 4,
         comment: "Walk-in previo",
         stayTokenFromCookie: null,
@@ -199,7 +182,7 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
 
       expect(movedFeedback?.guest_stay_id).toBe(first.formalStayId);
     },
-    30_000,
+    INTEGRATION_TIMEOUT.stayFlow,
   );
 
   it(
@@ -208,22 +191,13 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
       const { createFormalStay } = await import(
         "@/lib/stays/create-formal-stay"
       );
-      const { openCaptureSession } = await import(
-        "@/lib/staff/open-capture-session"
-      );
       const { submitFeedback } = await import("@/lib/capture/submit-feedback");
 
       const venueId = await getPilotVenueId();
-      const fingerprint = `test-${Date.now()}-formal-prevails`;
 
-      const opened = await openCaptureSession({
-        staffTagSlug: "caribe-staff-maria-g",
-        clientFingerprint: fingerprint,
-      });
-      expect(opened).not.toBeNull();
-
+      const opened = await openTestSession({ label: "formal-prevails-walkin" });
       const walkIn = await submitFeedback({
-        sessionToken: opened!.sessionToken,
+        sessionToken: opened.sessionToken,
         rating: 3,
         comment: "Walk-in sin check-in",
         stayTokenFromCookie: null,
@@ -236,14 +210,13 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
         createdByProfileId: null,
       });
 
-      const fp2 = `test-${Date.now()}-formal-prevails-2`;
-      const opened2 = await openCaptureSession({
-        staffTagSlug: "caribe-staff-carlos-p",
-        clientFingerprint: fp2,
+      const opened2 = await openTestSession({
+        slug: STAFF_SLUG.secondary,
+        label: "formal-prevails-formal",
       });
 
       const withFormalCookie = await submitFeedback({
-        sessionToken: opened2!.sessionToken,
+        sessionToken: opened2.sessionToken,
         rating: 5,
         comment: null,
         stayTokenFromCookie: formal.stay_token,
@@ -253,30 +226,22 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
       expect(withFormalCookie.stay.stay_type).toBe("formal");
       expect(withFormalCookie.stay.id).not.toBe(walkIn.stay.id);
     },
-    60_000,
+    INTEGRATION_TIMEOUT.stayFlow,
   );
 
   it(
     "consolidated ephemeral token does not accept new records (T062)",
     async () => {
-      const { openCaptureSession } = await import(
-        "@/lib/staff/open-capture-session"
-      );
       const { submitFeedback } = await import("@/lib/capture/submit-feedback");
       const { consolidateStays } = await import(
         "@/lib/stays/consolidate-stays"
       );
 
       const venueId = await getPilotVenueId();
-      const fingerprint = `test-${Date.now()}-consolidated-reject`;
 
-      const opened = await openCaptureSession({
-        staffTagSlug: "caribe-staff-maria-g",
-        clientFingerprint: fingerprint,
-      });
-
+      const opened = await openTestSession({ label: "consolidated-reject" });
       const walkIn = await submitFeedback({
-        sessionToken: opened!.sessionToken,
+        sessionToken: opened.sessionToken,
         rating: 4,
         comment: null,
         stayTokenFromCookie: null,
@@ -288,14 +253,13 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
         createdByProfileId: null,
       });
 
-      const fp2 = `test-${Date.now()}-consolidated-reject-2`;
-      const opened2 = await openCaptureSession({
-        staffTagSlug: "caribe-staff-carlos-p",
-        clientFingerprint: fp2,
+      const opened2 = await openTestSession({
+        slug: STAFF_SLUG.secondary,
+        label: "consolidated-reject-after",
       });
 
       const afterConsolidation = await submitFeedback({
-        sessionToken: opened2!.sessionToken,
+        sessionToken: opened2.sessionToken,
         rating: 5,
         comment: null,
         stayTokenFromCookie: walkIn.stay.stay_token,
@@ -305,7 +269,7 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
       expect(afterConsolidation.stay.stay_type).toBe("ephemeral");
       expect(afterConsolidation.stay.id).not.toBe(walkIn.stay.id);
     },
-    30_000,
+    INTEGRATION_TIMEOUT.stayFlow,
   );
 
   it(
@@ -313,9 +277,6 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
     async () => {
       const { createFormalStay } = await import(
         "@/lib/stays/create-formal-stay"
-      );
-      const { openCaptureSession } = await import(
-        "@/lib/staff/open-capture-session"
       );
       const { submitFeedback } = await import("@/lib/capture/submit-feedback");
       const { createInsforgeServerClient } = await import(
@@ -328,25 +289,20 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
         createdByProfileId: null,
       });
 
-      const fp1 = `test-${Date.now()}-sc010-a`;
-      const opened1 = await openCaptureSession({
-        staffTagSlug: "caribe-staff-maria-g",
-        clientFingerprint: fp1,
-      });
+      const opened1 = await openTestSession({ label: "sc010-formal" });
       const formalFeedback = await submitFeedback({
-        sessionToken: opened1!.sessionToken,
+        sessionToken: opened1.sessionToken,
         rating: 5,
         comment: null,
         stayTokenFromCookie: formal.stay_token,
       });
 
-      const fp2 = `test-${Date.now()}-sc010-b`;
-      const opened2 = await openCaptureSession({
-        staffTagSlug: "caribe-staff-carlos-p",
-        clientFingerprint: fp2,
+      const opened2 = await openTestSession({
+        slug: STAFF_SLUG.secondary,
+        label: "sc010-walkin",
       });
       const walkInFeedback = await submitFeedback({
-        sessionToken: opened2!.sessionToken,
+        sessionToken: opened2.sessionToken,
         rating: 4,
         comment: null,
         stayTokenFromCookie: null,
@@ -367,6 +323,6 @@ describe.skipIf(!hasInsforge)("guest stay integration (T051, T061, T062)", () =>
         expect(data?.guest_stay_id).toBeTruthy();
       }
     },
-    30_000,
+    INTEGRATION_TIMEOUT.stayFlow,
   );
 });

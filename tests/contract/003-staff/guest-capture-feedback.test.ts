@@ -5,6 +5,12 @@ import {
   hasInsforgeIntegrationEnv,
   loadTestEnv,
 } from "./helpers/load-env";
+import {
+  INTEGRATION_TIMEOUT,
+  STAFF_SLUG,
+  openTestSession,
+  uniqueFingerprint,
+} from "../../helpers/integration";
 
 loadTestEnv();
 
@@ -36,50 +42,42 @@ describe.skipIf(!hasInsforge)("guest capture feedback integration (T027, T048)",
   it(
     "submits feedback on active session and completes session",
     async () => {
-    const { openCaptureSession } = await import(
-      "@/lib/staff/open-capture-session"
-    );
-    const { submitFeedback } = await import("@/lib/capture/submit-feedback");
-    const { validateSession } = await import(
-      "@/lib/staff/validate-session"
-    );
-    const { createInsforgeServerClient } = await import(
-      "@/lib/insforge-server"
-    );
+      const { submitFeedback } = await import("@/lib/capture/submit-feedback");
+      const { validateSession } = await import(
+        "@/lib/staff/validate-session"
+      );
+      const { createInsforgeServerClient } = await import(
+        "@/lib/insforge-server"
+      );
 
-    const fingerprint = `test-${Date.now()}-feedback`;
-    const opened = await openCaptureSession({
-      staffTagSlug: "caribe-staff-maria-g",
-      clientFingerprint: fingerprint,
-    });
-    expect(opened).not.toBeNull();
+      const opened = await openTestSession({ label: "feedback-submit" });
 
-    const result = await submitFeedback({
-      sessionToken: opened!.sessionToken,
-      rating: 5,
-      comment: "Excelente atención",
-      stayTokenFromCookie: null,
-    });
+      const result = await submitFeedback({
+        sessionToken: opened.sessionToken,
+        rating: 5,
+        comment: "Excelente atención",
+        stayTokenFromCookie: null,
+      });
 
-    expect(result.id).toBeTruthy();
-    expect(result.message).toBe("¡Gracias por tu opinión!");
-    expect(result.stay.id).toBeTruthy();
-    expect(result.stayCreated).toBe(true);
+      expect(result.id).toBeTruthy();
+      expect(result.message).toBe("¡Gracias por tu opinión!");
+      expect(result.stay.id).toBeTruthy();
+      expect(result.stayCreated).toBe(true);
 
-    const after = await validateSession(opened!.sessionToken);
-    expect(after.status).toBe("expired");
+      const after = await validateSession(opened.sessionToken);
+      expect(after.status).toBe("expired");
 
-    const insforge = createInsforgeServerClient();
-    const { data: sessionRow } = await insforge.database
-      .from("staff_capture_sessions")
-      .select("status, guest_stay_id")
-      .eq("session_token", opened!.sessionToken)
-      .maybeSingle();
+      const insforge = createInsforgeServerClient();
+      const { data: sessionRow } = await insforge.database
+        .from("staff_capture_sessions")
+        .select("status, guest_stay_id")
+        .eq("session_token", opened.sessionToken)
+        .maybeSingle();
 
-    expect(sessionRow?.status).toBe("completed");
-    expect(sessionRow?.guest_stay_id).toBe(result.stay.id);
+      expect(sessionRow?.status).toBe("completed");
+      expect(sessionRow?.guest_stay_id).toBe(result.stay.id);
     },
-    20_000,
+    INTEGRATION_TIMEOUT.captureFlow,
   );
 
   it("returns SESSION_EXPIRED (410) for expired session", async () => {
@@ -93,7 +91,7 @@ describe.skipIf(!hasInsforge)("guest capture feedback integration (T027, T048)",
     const { data: tag } = await insforge.database
       .from("staff_nfc_tags")
       .select("id, staff_member_id, staff_members!inner(venue_id)")
-      .eq("tag_slug", "caribe-staff-maria-g")
+      .eq("tag_slug", STAFF_SLUG.primary)
       .eq("is_active", true)
       .maybeSingle();
 
@@ -145,39 +143,38 @@ describe.skipIf(!hasInsforge)("guest capture feedback integration (T027, T048)",
       .eq("id", inserted!.id);
   });
 
-  it("auto-creates ephemeral stay when guest has no cookie", async () => {
-    const { openCaptureSession } = await import(
-      "@/lib/staff/open-capture-session"
-    );
-    const { submitFeedback } = await import("@/lib/capture/submit-feedback");
-    const { createInsforgeServerClient } = await import(
-      "@/lib/insforge-server"
-    );
+  it(
+    "auto-creates ephemeral stay when guest has no cookie",
+    async () => {
+      const { submitFeedback } = await import("@/lib/capture/submit-feedback");
+      const { createInsforgeServerClient } = await import(
+        "@/lib/insforge-server"
+      );
 
-    const fingerprint = `test-${Date.now()}-ephemeral`;
-    const opened = await openCaptureSession({
-      staffTagSlug: "caribe-staff-carlos-p",
-      clientFingerprint: fingerprint,
-    });
-    expect(opened).not.toBeNull();
+      const opened = await openTestSession({
+        slug: STAFF_SLUG.secondary,
+        label: "ephemeral-auto",
+      });
 
-    const result = await submitFeedback({
-      sessionToken: opened!.sessionToken,
-      rating: 4,
-      comment: null,
-      stayTokenFromCookie: null,
-    });
+      const result = await submitFeedback({
+        sessionToken: opened.sessionToken,
+        rating: 4,
+        comment: null,
+        stayTokenFromCookie: null,
+      });
 
-    expect(result.stayCreated).toBe(true);
+      expect(result.stayCreated).toBe(true);
 
-    const insforge = createInsforgeServerClient();
-    const { data: stay } = await insforge.database
-      .from("guest_stays")
-      .select("stay_type, status")
-      .eq("id", result.stay.id)
-      .maybeSingle();
+      const insforge = createInsforgeServerClient();
+      const { data: stay } = await insforge.database
+        .from("guest_stays")
+        .select("stay_type, status")
+        .eq("id", result.stay.id)
+        .maybeSingle();
 
-    expect(stay?.stay_type).toBe("ephemeral");
-    expect(stay?.status).toBe("active");
-  }, 30_000);
+      expect(stay?.stay_type).toBe("ephemeral");
+      expect(stay?.status).toBe("active");
+    },
+    INTEGRATION_TIMEOUT.captureFlow,
+  );
 });
