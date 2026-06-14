@@ -34,13 +34,11 @@ export function DashboardFilters({
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams();
     params.set("from", from);
     params.set("to", to);
     if (tagId) {
       params.set("tagId", tagId);
-    } else {
-      params.delete("tagId");
     }
     router.replace(`/dashboard?${params.toString()}`);
   }

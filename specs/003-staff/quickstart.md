@@ -19,6 +19,24 @@ Guía para validar la Fase 3 end-to-end tras implementación. Referencia contrat
 
 ---
 
+## Paso 0 — Preparar datos piloto
+
+Ejecutar **≥24 h antes** de la semana piloto (o al inicio del ensayo end-to-end):
+
+```bash
+# Venue base Fase 1 (omitir si ya existe hotel-caribe)
+npm run seed
+
+# Preparación completa Fase 3: org, usuarios piloto, scorecards, incidencias demo
+npm run seed:demo
+
+npm run audit:orphans
+```
+
+**Esperado**: 0 huérfanos; ≥12 staff activos; ≥6 feedbacks por empleado piloto; ≥2 incidencias demo en bandeja supervisor. Re-ejecutar `npm run seed:demo` es idempotente (omite registros ya presentes).
+
+---
+
 ## Escenario 1 — NFC staff → feedback (S1, G1, SC-001, SC-002)
 
 **Objetivo**: Sesión ≤3s; expira 5 min; feedback con origen completo.
@@ -162,6 +180,9 @@ Guía para validar la Fase 3 end-to-end tras implementación. Referencia contrat
 ## Comandos útiles (post-implementación)
 
 ```bash
+# Preparación datos piloto (ver § Paso 0)
+npm run seed:demo
+
 # Migraciones locales
 npx @insforge/cli db push
 
@@ -231,11 +252,10 @@ INSFORGE_TEST_STAFF_JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ### Cómo obtener los JWTs
 
-**Prerrequisito:** usuarios piloto creados en InsForge Auth y vinculados a `user_profiles`:
+**Prerrequisito:** usuarios piloto creados en InsForge Auth y vinculados a `user_profiles` (ver § Paso 0):
 
 ```bash
-npm run seed:staff        # estructura org + categorías incidencia
-npm run seed:pilot-users  # supervisor, manager y recepción piloto
+npm run seed:demo
 ```
 
 Credenciales por defecto del seed (cambiables vía env):

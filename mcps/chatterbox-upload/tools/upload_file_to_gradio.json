@@ -1,0 +1,17 @@
+{
+  "name": "upload_file_to_gradio",
+  "description": "Generate a Gradio File Input for a local file by uploading it to a Gradio app and returning the URL.\n        Arguments:\n            file: A complete, absolute path to a local file to upload.\n        Returns:\n            Gradio File Input - A URL to the uploaded file.\n        ",
+  "inputSchema": {
+    "properties": {
+      "file": {
+        "title": "File",
+        "type": "string"
+      }
+    },
+    "required": [
+      "file"
+    ],
+    "title": "upload_file_to_gradioArguments",
+    "type": "object"
+  }
+}

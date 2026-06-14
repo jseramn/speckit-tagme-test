@@ -55,7 +55,7 @@ export function getRoleClient(role: Exclude<RlsTestRole, "service">): InsForgeCl
   const anonKey = process.env.INSFORGE_ANON_KEY?.trim();
   const jwt = process.env[ROLE_ENV_KEYS[role]]?.trim();
 
-  if (!baseUrl || !anonKey || !isJwtUsable(jwt)) return null;
+  if (!baseUrl || !anonKey || !jwt || !isJwtUsable(jwt)) return null;
 
   const client = createClient({ baseUrl, anonKey });
   // setAccessToken — not headers — so HttpClient does not overwrite JWT with anonKey.

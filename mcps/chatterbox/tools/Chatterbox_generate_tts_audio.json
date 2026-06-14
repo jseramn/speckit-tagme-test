@@ -1,0 +1,57 @@
+{
+  "name": "Chatterbox_generate_tts_audio",
+  "description": "Generate high-quality speech audio from text using ChatterboxTTS model with optional reference audio styling. This tool synthesizes natural-sounding speech from input text. When a reference audio file is provided, it captures the speaker's voice characteristics and speaking style. The generated audio maintains the prosody, tone, and vocal qualities of the reference speaker, or uses default voice if no reference is provided. If a user passes a file as an input, use the upload_file_to_gradio tool, if present, to upload the file to the gradio app and create a Gradio File Input. Then use the returned path as the input to the tool. Returns: tuple[int, np.ndarray]: A tuple containing the sample rate (int) and the generated audio waveform (numpy.ndarray)",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "text_input": {
+        "type": "string",
+        "description": "The text to synthesize into speech (maximum 300 characters)",
+        "default": "Now let's make my mum's favourite. So three mars bars into the pan. Then we add the tuna and just stir for a bit, just let the chocolate and fish infuse. A sprinkle of olive oil and some tomato ketchup. Now smell that. Oh boy this is going to be incredible."
+      },
+      "audio_prompt_path_input": {
+        "required": [
+          "path"
+        ],
+        "title": "FileData",
+        "type": "string",
+        "description": "File path or URL to the reference audio file that defines the target voice style. Defaults to None.",
+        "default": {
+          "path": "/tmp/gradio/cc31468fb14726df6713eae748369d8b7dc34c3b196b48f4e89a9cd51cb19b47/female_shadowheart4.flac",
+          "url": "/gradio_api/file=/tmp/gradio/cc31468fb14726df6713eae748369d8b7dc34c3b196b48f4e89a9cd51cb19b47/female_shadowheart4.flac",
+          "size": null,
+          "orig_name": null,
+          "mime_type": null,
+          "is_stream": false,
+          "meta": {
+            "_type": "gradio.FileData"
+          }
+        },
+        "format": "Gradio File Input - a http or https url to a file"
+      },
+      "exaggeration_input": {
+        "type": "number",
+        "description": "Controls speech expressiveness (0.25-2.0, neutral=0.5, extreme values may be unstable). Defaults to 0.5.",
+        "default": 0.5
+      },
+      "temperature_input": {
+        "type": "number",
+        "description": "Controls randomness in generation (0.05-5.0, higher=more varied). Defaults to 0.8.",
+        "default": 0.8
+      },
+      "seed_num_input": {
+        "type": "number",
+        "description": "Random seed for reproducible results (0 for random generation). Defaults to 0."
+      },
+      "cfgw_input": {
+        "type": "number",
+        "description": "CFG/Pace weight controlling generation guidance (0.2-1.0). Defaults to 0.5.",
+        "default": 0.5
+      },
+      "vad_trim_input": {
+        "type": "boolean",
+        "description": ""
+      }
+    }
+  }
+}
