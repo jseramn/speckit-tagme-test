@@ -1,5 +1,9 @@
 import { redirect } from "next/navigation";
-import { canManageGuestStays, getSession } from "@/lib/auth/session";
+import {
+  canManageGuestStays,
+  getSession,
+  isExecutiveSession,
+} from "@/lib/auth/session";
 
 export default async function ReceptionLayout({
   children,
@@ -10,6 +14,10 @@ export default async function ReceptionLayout({
 
   if (!session) {
     redirect("/login?next=/reception");
+  }
+
+  if (isExecutiveSession(session)) {
+    redirect("/executive/overview");
   }
 
   const allowed = await canManageGuestStays(session, session.venueId ?? undefined);

@@ -91,13 +91,37 @@ async function resolveStaffMemberId(
   return (data?.id as string) ?? null;
 }
 
-async function mapProfile(row: UserProfileRow): Promise<StaffSession> {
+export function isExecutiveRole(role: string): role is ExecutiveRole {
+  return EXECUTIVE_ROLES.has(role);
+}
+
+export function isExecutiveSession(
+  session: AppSession | null,
+): session is ExecutiveSession {
+  return session !== null && "isExecutive" in session && session.isExecutive === true;
+}
+
+function mapExecutiveProfile(row: UserProfileRow): ExecutiveSession {
+  const venue = firstRelation(row.venues);
+  return {
+    userId: row.auth_user_id,
+    role: row.role as ExecutiveRole,
+    executiveScope: row.executive_scope,
+    venueId: row.venue_id,
+    venueName: venue?.name ?? null,
+    venueSlug: venue?.slug ?? null,
+    displayName: row.display_name,
+    isExecutive: true,
+  };
+}
+
+async function mapStaffProfile(row: UserProfileRow): Promise<StaffSession> {
   const venue = firstRelation(row.venues);
   const staffMemberId = await resolveStaffMemberId(row.id);
   return {
     userId: row.auth_user_id,
     profileId: row.id,
-    role: row.role,
+    role: row.role as StaffRole,
     venueId: row.venue_id,
     venueName: venue?.name ?? null,
     venueSlug: venue?.slug ?? null,
@@ -106,7 +130,7 @@ async function mapProfile(row: UserProfileRow): Promise<StaffSession> {
   };
 }
 
-function mapProfile(row: UserProfileRow): AppSession {
+async function mapProfile(row: UserProfileRow): Promise<AppSession> {
   if (isExecutiveRole(row.role)) {
     return mapExecutiveProfile(row);
   }

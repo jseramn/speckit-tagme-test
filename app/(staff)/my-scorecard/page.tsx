@@ -3,6 +3,7 @@ import { MyScorecardClient } from "@/components/staff/MyScorecardClient";
 import {
   getSession,
   staffMemberIdForSession,
+  isExecutiveSession,
 } from "@/lib/auth/session";
 
 export default async function MyScorecardPage() {
@@ -10,6 +11,10 @@ export default async function MyScorecardPage() {
 
   if (!session) {
     redirect("/login?next=/my-scorecard");
+  }
+
+  if (isExecutiveSession(session)) {
+    redirect("/executive/overview");
   }
 
   const staffMemberId = await staffMemberIdForSession(session);
