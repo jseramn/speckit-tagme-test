@@ -14,11 +14,9 @@ const MAP: Array<{ src: string; dst: string }> = [
   { src: "001_initial_schema.sql", dst: "20260608120000_initial-schema.sql" },
   { src: "002_rls_policies.sql", dst: "20260608120001_rls-policies.sql" },
   { src: "003_metrics_views.sql", dst: "20260608120002_metrics-views.sql" },
-  { src: "004_executive_layer.sql", dst: "20260609120000_executive-layer.sql" },
-  {
-    src: "005_kpi_department_executive.sql",
-    dst: "20260609120001_kpi-department-executive.sql",
-  },
+  { src: "004_staff_schema.sql", dst: "20260610120000_staff-schema.sql" },
+  { src: "005_staff_rls.sql", dst: "20260610120001_staff-rls.sql" },
+  { src: "006_staff_scorecard_views.sql", dst: "20260610120002_staff-scorecard-views.sql" },
 ];
 
 function stripTransaction(sql: string): string {

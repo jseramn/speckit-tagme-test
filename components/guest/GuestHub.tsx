@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useState } from "react";
 import {
   resolveTouchChannel,
@@ -93,7 +94,10 @@ export function GuestHub({ payload }: GuestHubProps) {
 
       <header className="mb-8">
         {!roomContext.isRoom && (
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-tagme-gold">
+          <p
+            data-testid="guest-hub-zone"
+            className="text-xs font-medium uppercase tracking-[0.2em] text-tagme-gold"
+          >
             {zoneLabel(tag.zone, tag.roomNumber)}
           </p>
         )}
@@ -111,6 +115,40 @@ export function GuestHub({ payload }: GuestHubProps) {
           </p>
         )}
       </header>
+
+      <section className="mb-8">
+        <h2 className="mb-4 text-xs font-medium uppercase tracking-widest text-tagme-slate/60">
+          Tu estadía
+        </h2>
+        <ul className="flex flex-col gap-3">
+          <li>
+            <Link
+              href={`/capture/room/${tag.slug}`}
+              className="flex w-full flex-col rounded-xl border border-tagme-gold/30 bg-tagme-gold/10 px-5 py-4 text-left transition-colors hover:border-tagme-gold/50 hover:bg-tagme-gold/15"
+            >
+              <span className="text-base font-semibold text-tagme-ink">
+                Dejar opinión
+              </span>
+              <span className="mt-1 text-xs text-tagme-slate/70">
+                Califica tu experiencia en el hotel
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              href={`/capture/room/${tag.slug}`}
+              className="flex w-full flex-col rounded-xl border border-tagme-slate/15 bg-white px-5 py-4 text-left transition-colors hover:border-tagme-gold/40"
+            >
+              <span className="text-base font-semibold text-tagme-ink">
+                Reportar problema
+              </span>
+              <span className="mt-1 text-xs text-tagme-slate/70">
+                Incidencia que requiere atención del equipo
+              </span>
+            </Link>
+          </li>
+        </ul>
+      </section>
 
       <section className="flex-1">
         <h2 className="mb-4 text-xs font-medium uppercase tracking-widest text-tagme-slate/60">

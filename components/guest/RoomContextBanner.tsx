@@ -28,7 +28,12 @@ export function RoomContextBanner({
           {roomContext.welcomeHeadline}
         </h2>
         {tagLabel && (
-          <p className="mt-1.5 text-sm text-tagme-slate/70">{tagLabel}</p>
+          <p
+            data-testid="guest-room-label"
+            className="mt-1.5 text-sm text-tagme-slate/70"
+          >
+            {tagLabel}
+          </p>
         )}
         <p className="mt-3 text-sm leading-relaxed text-tagme-slate/80">
           Room service 24 horas, WiFi y amenidades a un toque. Recepción disponible

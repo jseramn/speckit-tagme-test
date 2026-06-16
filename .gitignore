@@ -12,6 +12,7 @@
 /coverage
 /playwright-report
 /test-results
+node_modules/.cache/vitest
 
 # next.js
 /.next/
@@ -54,5 +55,5 @@ next-env.d.ts
 .roo
 .trae
 .windsurf
-
+.understand-anything
 .vercel

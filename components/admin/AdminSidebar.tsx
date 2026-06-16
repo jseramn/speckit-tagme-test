@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/content", label: "Contenido" },
   { href: "/knowledge", label: "Conocimiento AVEX" },
   { href: "/tags", label: "Tags NFC" },
+  { href: "/simulator", label: "Simulador NFC" },
 ];
 
 interface AdminSidebarProps {

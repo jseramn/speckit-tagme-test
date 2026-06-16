@@ -89,32 +89,20 @@ async function fetchDestinationVisits(
 ): Promise<VisitRow[]> {
   const insforge = createInsforgeServerClient();
 
-  let touchQuery = insforge.database
-    .from("touch_events")
-    .select("id")
-    .eq("venue_id", venueId)
+  let query = insforge.database
+    .from("destination_visits")
+    .select("destination_type, touch_events!inner(venue_id, deduplicated, tag_id)")
     .gte("created_at", fromDate.toISOString())
-    .lte("created_at", toDate.toISOString());
+    .lte("created_at", toDate.toISOString())
+    .eq("touch_events.venue_id", venueId)
+    .eq("touch_events.deduplicated", false);
 
   if (tagId) {
-    touchQuery = touchQuery.eq("tag_id", tagId);
+    query = query.eq("touch_events.tag_id", tagId);
   }
 
-  const { data: touches, error: touchError } = await touchQuery;
-  if (touchError) throw new Error(touchError.message);
-
-  const touchIds = (touches ?? []).map((t) => t.id as string);
-  if (touchIds.length === 0) return [];
-
-  const { data, error } = await insforge.database
-    .from("destination_visits")
-    .select("destination_type")
-    .in("touch_event_id", touchIds)
-    .gte("created_at", fromDate.toISOString())
-    .lte("created_at", toDate.toISOString());
-
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
-
   return (data ?? []) as VisitRow[];
 }
 

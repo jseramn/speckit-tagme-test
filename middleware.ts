@@ -44,7 +44,9 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  response.headers.set("x-pathname", pathname);
+  return response;
 }
 
 export const config = {
@@ -52,7 +54,11 @@ export const config = {
     "/dashboard/:path*",
     "/tags/:path*",
     "/content/:path*",
-    "/executive",
-    "/executive/:path*",
+    "/reception/:path*",
+    "/my-scorecard",
+    "/incidents/:path*",
+    "/scorecards/:path*",
+    "/pulse/:path*",
+    "/organization/:path*",
   ],
 };
