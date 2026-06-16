@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { ScorecardDrillDown } from "@/components/supervisor/ScorecardDrillDown";
-import { getSession } from "@/lib/auth/session";
+import { getSession, isExecutiveSession } from "@/lib/auth/session";
 import { supervisorScopeDepartmentIds } from "@/lib/supervisor/department-scope";
 import { createInsforgeServerClient } from "@/lib/insforge-server";
 
@@ -9,6 +9,10 @@ export default async function SupervisorScorecardsPage() {
 
   if (!session) {
     redirect("/login?next=/scorecards");
+  }
+
+  if (isExecutiveSession(session)) {
+    redirect('/executive/overview');
   }
 
   const scopeIds = await supervisorScopeDepartmentIds(session);

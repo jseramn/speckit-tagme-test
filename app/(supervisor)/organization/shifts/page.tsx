@@ -1,12 +1,18 @@
 import { redirect } from "next/navigation";
 import { OrganizationTree } from "@/components/supervisor/OrganizationTree";
 import { ShiftsPanel } from "@/components/supervisor/ShiftsPanel";
-import { getSession } from "@/lib/auth/session";
+import { getSession, isExecutiveSession } from "@/lib/auth/session";
 import { loadOrgDepartments } from "@/lib/supervisor/load-org-departments";
 
 export default async function OrganizationShiftsPage() {
   const session = await getSession();
-  if (!session) redirect("/login?next=/organization/shifts");
+  if (!session) {
+    redirect("");
+  }
+
+  if (isExecutiveSession(session)) {
+    redirect('/executive/overview');
+  }
 
   const departments = await loadOrgDepartments(session);
 
@@ -31,3 +37,4 @@ export default async function OrganizationShiftsPage() {
     </main>
   );
 }
+

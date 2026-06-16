@@ -4,7 +4,7 @@ import {
   OrganizationTree,
   type OrgDepartment,
 } from "@/components/supervisor/OrganizationTree";
-import { getSession } from "@/lib/auth/session";
+import { getSession, isExecutiveSession } from "@/lib/auth/session";
 import { loadOrgDepartments } from "@/lib/supervisor/load-org-departments";
 
 const QUICK_LINKS = [
@@ -32,7 +32,13 @@ const QUICK_LINKS = [
 
 export default async function OrganizationHubPage() {
   const session = await getSession();
-  if (!session) redirect("/login?next=/organization");
+  if (!session) {
+    redirect("");
+  }
+
+  if (isExecutiveSession(session)) {
+    redirect('/executive/overview');
+  }
 
   const departments: OrgDepartment[] = await loadOrgDepartments(session);
 
@@ -73,3 +79,4 @@ export default async function OrganizationHubPage() {
     </main>
   );
 }
+

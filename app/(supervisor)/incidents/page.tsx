@@ -1,5 +1,5 @@
 import { listIncidents } from "@/lib/supervisor/list-incidents";
-import { getSession } from "@/lib/auth/session";
+import { getSession, isExecutiveSession } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 import { IncidentInbox } from "@/components/supervisor/IncidentInbox";
 
@@ -8,6 +8,10 @@ export default async function SupervisorIncidentsPage() {
 
   if (!session) {
     redirect("/login?next=/incidents");
+  }
+
+  if (isExecutiveSession(session)) {
+    redirect("/executive/overview");
   }
 
   const openIncidents = await listIncidents(session, {

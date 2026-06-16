@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { SupervisorSidebar } from "@/components/supervisor/SupervisorSidebar";
 import { loginRedirectPath } from "@/lib/auth/login-redirect";
-import { getSession } from "@/lib/auth/session";
+import { getSession, isExecutiveSession } from "@/lib/auth/session";
 
 const SUPERVISOR_ROLES = new Set(["supervisor", "manager", "admin"]);
 
@@ -14,6 +14,10 @@ export default async function SupervisorLayout({
 
   if (!session) {
     redirect(await loginRedirectPath("/incidents"));
+  }
+
+  if (isExecutiveSession(session)) {
+    redirect("/executive/overview");
   }
 
   if (!SUPERVISOR_ROLES.has(session.role)) {

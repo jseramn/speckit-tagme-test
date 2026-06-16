@@ -1,12 +1,18 @@
 import { redirect } from "next/navigation";
 import { JobRolesPanel } from "@/components/supervisor/JobRolesPanel";
 import { OrganizationTree } from "@/components/supervisor/OrganizationTree";
-import { getSession } from "@/lib/auth/session";
+import { getSession, isExecutiveSession } from "@/lib/auth/session";
 import { loadOrgDepartments } from "@/lib/supervisor/load-org-departments";
 
 export default async function OrganizationJobRolesPage() {
   const session = await getSession();
-  if (!session) redirect("/login?next=/organization/job-roles");
+  if (!session) {
+    redirect("");
+  }
+
+  if (isExecutiveSession(session)) {
+    redirect('/executive/overview');
+  }
 
   const departments = await loadOrgDepartments(session);
 
@@ -30,3 +36,4 @@ export default async function OrganizationJobRolesPage() {
     </main>
   );
 }
+

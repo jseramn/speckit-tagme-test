@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth/session";
+import { getSession, isExecutiveSession } from "@/lib/auth/session";
 import { parsePeriod } from "@/lib/scorecards/parse-period";
 import { queryHotelScorecard } from "@/lib/scorecards/query-hotel";
 
@@ -9,6 +9,10 @@ export default async function SupervisorPulsePage() {
 
   if (!session) {
     redirect("/login?next=/pulse");
+  }
+
+  if (isExecutiveSession(session)) {
+    redirect('/executive/overview');
   }
 
   const period = parsePeriod("7d");

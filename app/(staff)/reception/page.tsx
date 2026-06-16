@@ -1,12 +1,16 @@
 import { redirect } from "next/navigation";
 import { StayGenerator } from "@/components/staff/StayGenerator";
-import { getSession } from "@/lib/auth/session";
+import { getSession, isExecutiveSession } from "@/lib/auth/session";
 
 export default async function ReceptionPage() {
   const session = await getSession();
 
   if (!session?.venueId) {
     redirect("/login?next=/reception");
+  }
+
+  if (isExecutiveSession(session)) {
+    redirect('/executive/overview');
   }
 
   return (

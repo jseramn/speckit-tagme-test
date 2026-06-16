@@ -1,12 +1,18 @@
 import { redirect } from "next/navigation";
 import { OrganizationTree } from "@/components/supervisor/OrganizationTree";
 import { StaffOrgPanel } from "@/components/supervisor/StaffOrgPanel";
-import { getSession } from "@/lib/auth/session";
+import { getSession, isExecutiveSession } from "@/lib/auth/session";
 import { loadOrgDepartments } from "@/lib/supervisor/load-org-departments";
 
 export default async function OrganizationStaffPage() {
   const session = await getSession();
-  if (!session) redirect("/login?next=/organization/staff");
+  if (!session) {
+    redirect("");
+  }
+
+  if (isExecutiveSession(session)) {
+    redirect('/executive/overview');
+  }
 
   const departments = await loadOrgDepartments(session);
 
@@ -32,3 +38,4 @@ export default async function OrganizationStaffPage() {
     </main>
   );
 }
+

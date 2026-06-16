@@ -1,12 +1,16 @@
 import { redirect } from "next/navigation";
 import { StayConsolidation } from "@/components/staff/StayConsolidation";
-import { getSession } from "@/lib/auth/session";
+import { getSession, isExecutiveSession } from "@/lib/auth/session";
 
 export default async function ReceptionConsolidatePage() {
   const session = await getSession();
 
   if (!session?.venueId) {
     redirect("/login?next=/reception/consolidate");
+  }
+
+  if (isExecutiveSession(session)) {
+    redirect('/executive/overview');
   }
 
   return (
