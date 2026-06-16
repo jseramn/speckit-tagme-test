@@ -1,7 +1,0 @@
----
-pid: 24032
-cwd: "C:\Users\jseramn\Desktop\speckit-tagme-test"
-command: "cd \"C:\\Users\\jseramn\\Desktop\\speckit-tagme-test\" && npx playwright test tests/e2e/room-context.spec.ts 2>&1"
-started_at: 2026-06-09T03:12:10.177Z
-running_for_ms: 960003   
----

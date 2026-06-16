@@ -1,7 +1,0 @@
----
-pid: 29336
-cwd: "C:\Users\jseramn\Desktop\speckit-tagme-test"
-command: "curl -s http://localhost:3000/t/caribe-room-412 2>&1 | Select-String -Pattern \"Bienvenido|habitación|Servicio\" | Select-Object -First 5"
-started_at: 2026-06-09T03:18:23.699Z
-running_for_ms: 674994   
----

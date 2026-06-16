@@ -1,0 +1,18 @@
+{
+  "name": "tagme-understand-dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "packages/core",
+    "packages/dashboard"
+  ],
+  "scripts": {
+    "dev": "npm --workspace @understand-anything/dashboard run dev:static",
+    "build": "npm --workspace @understand-anything/dashboard run build:vercel",
+    "preview": "npm --workspace @understand-anything/dashboard run preview"
+  },
+  "engines": {
+    "node": ">=20 <24"
+  }
+}
