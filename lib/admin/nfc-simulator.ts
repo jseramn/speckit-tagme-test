@@ -104,7 +104,14 @@ export async function fetchActiveRoomTags(
     return [];
   }
 
-  return (data as RoomTagSimulatorItem[]).map((row) => ({
+  interface RoomTagDbRow {
+    id: string;
+    slug: string;
+    label: string;
+    room_number: string | null;
+  }
+
+  return (data as RoomTagDbRow[]).map((row) => ({
     id: row.id,
     slug: row.slug,
     label: row.label,

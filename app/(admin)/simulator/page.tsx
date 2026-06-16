@@ -51,5 +51,4 @@ export default async function SimulatorPage() {
       />
     </main>
   );
-}
-{
+}
