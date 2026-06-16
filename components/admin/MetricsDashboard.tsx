@@ -1,11 +1,11 @@
 import { Suspense } from "react";
 import type { MetricsSummary } from "@/lib/validators/events";
-import { CountryBreakdownChart } from "./CountryBreakdownChart";
+import { CountryBreakdownChart } from "@/components/charts/CountryBreakdownChart";
+import { DestinationBreakdown } from "@/components/charts/DestinationBreakdown";
+import { DeviceBreakdownChart } from "@/components/charts/DeviceBreakdownChart";
+import { PeakHoursChart } from "@/components/charts/PeakHoursChart";
+import { TouchChart } from "@/components/charts/TouchChart";
 import { DashboardFilters } from "./DashboardFilters";
-import { DestinationBreakdown } from "./DestinationBreakdown";
-import { DeviceBreakdownChart } from "./DeviceBreakdownChart";
-import { PeakHoursChart } from "./PeakHoursChart";
-import { TouchChart } from "./TouchChart";
 
 export interface TagFilterOption {
   id: string;

@@ -55,7 +55,9 @@ export function LoginForm() {
           Acceso staff
         </h1>
         <p className="mt-2 text-sm text-tagme-slate">
-          Inicie sesión para gestionar contenido, tags NFC y métricas.
+          {nextPath.startsWith("/executive")
+            ? "Acceso gerencial — panorama, alertas y reportes ejecutivos."
+            : "Inicie sesión para gestionar contenido, tags NFC y métricas."}
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
