@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import type { StaffSession } from "@/lib/auth/session";
 
@@ -28,6 +29,7 @@ export function SupervisorSidebar({ session }: SupervisorSidebarProps) {
   return (
     <aside className="flex w-full flex-col border-b border-tagme-slate/10 bg-white lg:min-h-screen lg:w-64 lg:border-b-0 lg:border-r">
       <div className="px-5 py-6">
+        <Image src="/logo.png" alt="TagMe Logo" width={32} height={32} className="mb-3 object-contain" />
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-tagme-gold">
           TagMe
         </p>

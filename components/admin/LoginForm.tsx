@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
@@ -48,6 +49,7 @@ export function LoginForm() {
       <div className="pointer-events-none fixed inset-x-0 top-0 h-48 bg-gradient-to-b from-tagme-gold/10 to-transparent" />
 
       <div className="relative w-full max-w-md rounded-2xl border border-tagme-slate/10 bg-white p-8 shadow-sm">
+        <Image src="/logo.png" alt="TagMe Logo" width={40} height={40} className="mb-5 object-contain" />
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-tagme-gold">
           TagMe Admin
         </p>

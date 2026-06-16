@@ -1,9 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-tagme-cream px-6">
-      <div className="max-w-md text-center">
+      <div className="flex max-w-md flex-col items-center text-center">
+        <Image src="/logo.png" alt="TagMe Logo" width={56} height={56} className="mb-6 object-contain" />
         <p className="mb-2 text-sm uppercase tracking-[0.2em] text-tagme-gold">
           TagMe™
         </p>
